@@ -97,21 +97,21 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-    'django.template.context_processors.i18n',
-    'django.template.context_processors.debug',
-    'django.template.context_processors.request',
-    'django.template.context_processors.media',
-    'django.template.context_processors.csrf',
-    'django.template.context_processors.tz',
-    'sekizai.context_processors.sekizai',
-    'django.template.context_processors.static',
-    'cms.context_processors.cms_settings'
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.template.context_processors.media',
+                'django.template.context_processors.csrf',
+                'django.template.context_processors.tz',
+                'sekizai.context_processors.sekizai',
+                'django.template.context_processors.static',
+                'cms.context_processors.cms_settings'
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.eggs.Loader'
+                'django.template.loaders.app_directories.Loader',
+                'django.template.loaders.eggs.Loader'
             ],
         },
     },
@@ -163,6 +163,7 @@ INSTALLED_APPS = (
     
     'django_extensions',
     'rest_framework',
+    'django_s3_storage',
     
     'water',
     'main'
@@ -214,6 +215,9 @@ DATABASES = {
     }
 }
 
+DEFAULT_FILE_STORAGE="django_s3_storage.storage.S3Storage"
+STATICFILES_STORAGE="django_s3_storage.storage.StaticS3Storage" 
+
 MIGRATION_MODULES = {
     
 }
@@ -224,3 +228,8 @@ THUMBNAIL_PROCESSORS = (
     'filer.thumbnail_processors.scale_and_crop_with_subject_location',
     'easy_thumbnails.processors.filters'
 )
+
+try:
+    from settings_local import *
+except:
+    pass

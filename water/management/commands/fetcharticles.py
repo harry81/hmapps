@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-
+import requests
 
 class Command(BaseCommand):
     help = "My shiny new management command."
@@ -8,4 +8,6 @@ class Command(BaseCommand):
     #     parser.add_argument('sample', nargs='+')
 
     def handle(self, *args, **options):
-        print 'hi'
+        url = "http://www.hani.co.kr/arti/economy/economy_general/787918.html"
+        rep = requests.get(url)
+        print rep.ok
