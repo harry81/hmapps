@@ -84,9 +84,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'main', 'static'),
-)
 SITE_ID = 1
 
 
@@ -163,7 +160,7 @@ INSTALLED_APPS = (
     
     'django_extensions',
     'rest_framework',
-    'django_s3_storage',
+    'storages',
     
     'water',
     'main'
@@ -214,13 +211,15 @@ DATABASES = {
         'USER': ''
     }
 }
-
-DEFAULT_FILE_STORAGE="django_s3_storage.storage.S3Storage"
-STATICFILES_STORAGE="django_s3_storage.storage.StaticS3Storage" 
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_STORAGE_BUCKET_NAME = 'hmapps'
 
 MIGRATION_MODULES = {
     
 }
+
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
 
 THUMBNAIL_PROCESSORS = (
     'easy_thumbnails.processors.colorspace',
