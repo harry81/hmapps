@@ -27,12 +27,7 @@ DEBUG = True
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
-    'rocketpunch-app.tdirjp8mny.ap-northeast-2.elasticbeanstalk.com',
-    'rocketchat.healworld.co.kr',
-    'rocketchatalb.healworld.co.kr',
-    'rocketchat-backend.healworld.co.kr',
-    'rocketchat.healworld.co.kr.s3-website.ap-northeast-2.amazonaws.com',
-    'rocketchat-768361647.ap-northeast-2.elb.amazonaws.com',
+    'hmapps.gv34rimdzh.ap-northeast-2.elasticbeanstalk.com',
     'localhost:4200',
     # load balancer
     'awseb-e-m-AWSEBLoa-4DPWDQCW8ORD-1476180177.ap-northeast-2.elb.amazonaws.com',
