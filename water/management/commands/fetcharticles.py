@@ -5,9 +5,7 @@ from urlparse import urlparse
 from django.core.management.base import BaseCommand
 from django.core.files.storage import default_storage
 from lxml import etree
-from datetime import datetime
 import feedparser
-from StringIO import StringIO
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -46,20 +44,21 @@ class Command(BaseCommand):
                 subtitle = '\n'.join(map(lambda x: x.strip(), subtitle))
 
                 text = root.xpath('//div[@class="text"]/text()')
-                text = '\n'.join(map(lambda x: x.strip(), text))
+                if len(text) == 0:
+                    text = root.xpath('//div[@class="article-contents"]/text()')
 
-                print url, title, subtitle, text
+                text = '\n'.join(map(lambda x: x.strip(), text)).strip()
 
                 try:
-                    publish_at =  root.xpath('//p[@class="date-time"]/span/text()')
+                    publish_at = root.xpath('//p[@class="date-time"]/span/text()')
 
-                except ValueError as e:
-                    publish_at =  root.xpath('//p[@class="date"]/span/text()')
+                except ValueError:
+                    publish_at = root.xpath('//p[@class="date"]/span/text()')
 
+                print url, title, subtitle, text, publish_at
 
             except IndexError as e:
                 print e
-
 
     def handle(self, *args, **options):
         self.load_from_S3()
