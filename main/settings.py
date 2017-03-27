@@ -209,12 +209,12 @@ DATABASES = {
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_STORAGE_BUCKET_NAME = 'hmapps'
 
-MIGRATION_MODULES = {
-    
-}
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+
+S3_USE_SIGV4 = True
+AWS_S3_HOST = 's3.ap-northeast-2.amazonaws.com'
 
 THUMBNAIL_PROCESSORS = (
     'easy_thumbnails.processors.colorspace',
