@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
 import requests
+import feedparser
+from lxml import etree
 from urlparse import urlparse
 from django.core.management.base import BaseCommand
 from django.core.files.storage import default_storage
-from lxml import etree
-import feedparser
+from water.utils import send_email_for_test
+ from dateutil.parser import parse
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -20,13 +23,16 @@ class Command(BaseCommand):
         for ele in feed.entries:
             category = 'hani'
             url = ele.link
-            filename = '%s/%s' % (category, urlparse(url).path.split('/')[-1])
+            published = parse(ele.published)
+
+            filename = '%s%s%s%s/%s' % (publishedcategory, urlparse(url).path.split('/')[-1])
 
             if default_storage.exists(filename):
                 print 'Skip because already done - %s' % filename
                 continue
 
             rep = requests.get(url)
+            import ipdb; ipdb.set_trace()
 
             fp = default_storage.open('%s' % (filename), 'w')
             fp.write(rep.content)
@@ -35,10 +41,9 @@ class Command(BaseCommand):
             print "Fetched %s, Save on S3 %s" % (rep.ok, fp)
 
     def load_from_S3(self):
-        articles = {}
+        articles = []
         for ele in default_storage.bucket.list():
             article = {}
-            print ele
             content = ele.read()
             root = etree.HTML(content)
 
@@ -66,7 +71,6 @@ class Command(BaseCommand):
 
                 article['publish_at'] = publish_at
 
-                print article
                 articles.append(article)
 
             except IndexError as e:
@@ -75,5 +79,6 @@ class Command(BaseCommand):
         return articles
 
     def handle(self, *args, **options):
-        # self.load_from_S3()
         self.fetch_news_to_S3()
+        articles = self.load_from_S3()
+        send_email_for_test(articles)
