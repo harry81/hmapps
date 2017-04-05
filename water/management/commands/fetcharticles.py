@@ -18,13 +18,17 @@ class Command(BaseCommand):
         feed = feedparser.parse('http://www.hani.co.kr/rss/')
 
         for ele in feed.entries:
-            url = ele.link
             category = 'hani'
+            url = ele.link
+            filename = '%s/%s' % (category, urlparse(url).path.split('/')[-1])
+
+            if default_storage.exists(filename):
+                print 'Skip because already done - %s' % filename
+                continue
+
             rep = requests.get(url)
 
-            filename = urlparse(url).path.split('/')[-1]
-            import ipdb; ipdb.set_trace()
-            fp = default_storage.open('%s/%s' % (category, filename), 'w')
+            fp = default_storage.open('%s' % (filename), 'w')
             fp.write(rep.content)
             fp.close()
 
@@ -61,5 +65,5 @@ class Command(BaseCommand):
                 print e
 
     def handle(self, *args, **options):
-        self.load_from_S3()
-        # self.fetch_news_to_S3()
+        # self.load_from_S3()
+        self.fetch_news_to_S3()
