@@ -35,23 +35,28 @@ class Command(BaseCommand):
             print "Fetched %s, Save on S3 %s" % (rep.ok, fp)
 
     def load_from_S3(self):
+        articles = {}
         for ele in default_storage.bucket.list():
+            article = {}
             print ele
             content = ele.read()
             root = etree.HTML(content)
 
             try:
-                url = root.xpath('//meta[@property="og:url"]/@content')[0]
-                title = root.xpath('//title/text()')[0]
+                article['url'] = root.xpath('//meta[@property="og:url"]/@content')[0]
+                article['title'] = root.xpath('//title/text()')[0]
 
                 subtitle = root.xpath('//div[@class="subtitle"]/text()')
                 subtitle = '\n'.join(map(lambda x: x.strip(), subtitle))
+
+                article['subtitle'] = subtitle
 
                 text = root.xpath('//div[@class="text"]/text()')
                 if len(text) == 0:
                     text = root.xpath('//div[@class="article-contents"]/text()')
 
                 text = '\n'.join(map(lambda x: x.strip(), text)).strip()
+                article['text'] = text
 
                 try:
                     publish_at = root.xpath('//p[@class="date-time"]/span/text()')
@@ -59,10 +64,15 @@ class Command(BaseCommand):
                 except ValueError:
                     publish_at = root.xpath('//p[@class="date"]/span/text()')
 
-                print url, title, subtitle, text, publish_at
+                article['publish_at'] = publish_at
+
+                print article
+                articles.append(article)
 
             except IndexError as e:
                 print e
+
+        return articles
 
     def handle(self, *args, **options):
         # self.load_from_S3()
