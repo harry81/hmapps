@@ -155,12 +155,13 @@ INSTALLED_APPS = (
     'djangocms_snippet',
     'djangocms_googlemap',
     'djangocms_video',
-    
+
     'django_extensions',
     'rest_framework',
     'storages',
     'djcelery',
-    
+    "post_office",
+
     'water',
     'main'
 )
