@@ -102,3 +102,4 @@ db.sqlite3
 /main/settings_local.py
 
 /static
+/djcelery.schedulers.DatabaseScheduler
