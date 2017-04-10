@@ -160,7 +160,6 @@ INSTALLED_APPS = (
     'rest_framework',
     'storages',
     'djcelery',
-    "post_office",
 
     'water',
     'main'
@@ -235,6 +234,7 @@ CMS_TEMPLATES = (
 CMS_PERMISSION = True
 
 CMS_PLACEHOLDER_CONF = {}
+
 
 
 DATABASES = {
