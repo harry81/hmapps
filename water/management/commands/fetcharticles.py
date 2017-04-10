@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import sys
 import requests
-import feedparser
 from lxml import etree
 from urlparse import urlparse
 from django.core.management.base import BaseCommand
 from django.core.files.storage import default_storage
 from water.utils import send_email_for_test
- from dateutil.parser import parse
+from dateutil.parser import parse
+from StringIO import StringIO
 
 
 reload(sys)
@@ -18,21 +18,23 @@ class Command(BaseCommand):
     help = "My shiny new management command."
 
     def fetch_news_to_S3(self):
-        feed = feedparser.parse('http://www.hani.co.kr/rss/')
+        feeds = requests.get('http://www.hani.co.kr/rss/')
+        output = StringIO(feeds.content)
+        tree = etree.parse(output)
 
-        for ele in feed.entries:
+        for item in tree.xpath('/rss/channel/item'):
             category = 'hani'
-            url = ele.link
-            published = parse(ele.published)
-
-            filename = '%s%s%s%s/%s' % (publishedcategory, urlparse(url).path.split('/')[-1])
+            url = item.xpath('link/text()')[0]
+            published = parse(item.xpath('pubDate/text()')[0])
+            filename = '%s/%s-%s' % (category,
+                                     published.strftime('%Y-%m-%d'),
+                                     urlparse(url).path.split('/')[-1])
 
             if default_storage.exists(filename):
                 print 'Skip because already done - %s' % filename
                 continue
 
             rep = requests.get(url)
-            import ipdb; ipdb.set_trace()
 
             fp = default_storage.open('%s' % (filename), 'w')
             fp.write(rep.content)
