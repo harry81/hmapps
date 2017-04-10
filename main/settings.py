@@ -321,6 +321,8 @@ LOGGING = {
     },
 }
 
+import djcelery
+djcelery.setup_loader()
 
 try:
     from settings_local import *
