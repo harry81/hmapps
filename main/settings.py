@@ -321,6 +321,15 @@ LOGGING = {
     },
 }
 
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+SERVER_EMAIL = 'chharry@gmail.com'
+EMAIL_SUBJECT_PREFIX = '[hmapps]'
+
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
 import djcelery
 djcelery.setup_loader()
 
