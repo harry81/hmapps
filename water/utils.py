@@ -9,8 +9,8 @@ from dateutil.parser import parse
 from django.core.mail import EmailMultiAlternatives
 
 
-def fetch_news_to_S3():
-    feeds = requests.get('http://www.hani.co.kr/rss/')
+def fetch_news_to_S3(url='http://www.hani.co.kr/rss/'):
+    feeds = requests.get(url)
     output = StringIO(feeds.content)
     tree = etree.parse(output)
 
@@ -23,7 +23,7 @@ def fetch_news_to_S3():
                                  urlparse(url).path.split('/')[-1])
 
         if default_storage.exists(filename):
-            print 'Skip because already done - %s' % filename
+            print 'Skiped because already done - %s' % filename
             continue
 
         rep = requests.get(url)
@@ -83,8 +83,8 @@ def send_email_for_fetched_articles(articles):
     html_content = ''
 
     for article in articles:
-        html_content += "<p>%s<a href='%s'></p>" % (
-            article['title'], article['url'])
+        html_content += "<p><a href='%s'>%s</a></p>" % (
+            article['url'], article['title'])
 
         text_content += "%s - %s" % (
             article['title'], article['url'],)

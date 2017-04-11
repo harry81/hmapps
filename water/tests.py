@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import requests_mock
-import shutil
+from django.core import mail
 import os
 import boto
 from datetime import datetime
 from django.test import TestCase
-from water.utils import fetch_news_to_S3, load_from_S3
+from water.utils import fetch_news_to_S3, load_from_S3, send_email_for_fetched_articles
 from django.core.files.storage import default_storage
 from moto import mock_s3
 
@@ -55,6 +56,10 @@ class ArticlesTestCase(TestCase):
 
         articles = load_from_S3()
         self.assertEqual(len(articles), 3)
+
+        send_email_for_fetched_articles(articles)
+        mail_article = mail.outbox.pop()
+        self.assertIn(u'한겨레', mail_article.body)
 
     def tearDown(self):
         self.moto.stop()
