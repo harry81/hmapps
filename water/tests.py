@@ -54,7 +54,8 @@ class ArticlesTestCase(TestCase):
         """
 
         for ele in [e for e in os.listdir('water/dumps/') if 'html' in e]:
-            default_storage.save('hani/%s-%s' % (datetime.now().strftime('%Y-%m-%d'), ele),
+            default_storage.save('hani/%s-%s' %
+                                 (datetime.now().strftime('%Y-%m-%d'), ele),
                                  open('water/dumps/%s' % ele, 'r'))
 
         articles = load_from_S3()

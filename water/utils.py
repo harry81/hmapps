@@ -36,13 +36,16 @@ def fetch_news_to_S3():
 def load_from_S3():
     articles = []
 
-    for ele in default_storage.bucket.list(prefix='hani/%s' % datetime.now().strftime('%Y-%m-%d')):
+    for ele in default_storage.bucket.list(
+            prefix='hani/%s' % datetime.now().strftime('%Y-%m-%d')):
+
         article = {}
         content = ele.read()
         root = etree.HTML(content)
 
         try:
-            article['url'] = root.xpath('//meta[@property="og:url"]/@content')[0]
+            article['url'] = root.xpath(
+                '//meta[@property="og:url"]/@content')[0]
             article['title'] = root.xpath('//title/text()')[0]
 
             subtitle = root.xpath('//div[@class="subtitle"]/text()')
