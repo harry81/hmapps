@@ -9,18 +9,38 @@ from dateutil.parser import parse
 from django.core.mail import EmailMultiAlternatives
 
 
-def fetch_news_to_S3(url='http://www.hani.co.kr/rss/'):
-    feeds = requests.get(url)
-    output = StringIO(feeds.content)
-    tree = etree.parse(output)
+def _get_filename(item=None):
 
-    for item in tree.xpath('/rss/channel/item'):
+    if item is None:
+        return None
+
+    url = item.xpath('link/text()')[0]
+    published = parse(item.xpath('pubDate/text()')[0])
+
+    if 'www.hani.co.kr' in url:
         category = 'hani'
-        url = item.xpath('link/text()')[0]
-        published = parse(item.xpath('pubDate/text()')[0])
         filename = '%s/%s-%s' % (category,
                                  published.strftime('%Y-%m-%d'),
                                  urlparse(url).path.split('/')[-1])
+
+    elif 'mk.co.kr' in url:
+        category = 'mk'
+        filename = '%s/%s-%s.html' % (
+            category,
+            published.strftime('%Y-%m-%d'),
+            urlparse(url).query.split('&')[0].split('=')[1])
+
+    return filename, category
+
+
+def fetch_news_to_S3(url='http://www.hani.co.kr/rss'):
+    feeds = requests.get(url)
+    output = StringIO(feeds.content)
+    tree = etree.parse(output, etree.XMLParser(encoding='utf-8'))
+
+    for item in tree.xpath('/rss/channel/item'):
+        filename, category = _get_filename(item)
+        url = item.xpath('link/text()')[0]
 
         if default_storage.exists(filename):
             print 'Skiped because already done - %s' % filename
