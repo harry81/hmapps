@@ -74,7 +74,7 @@ def load_from_S3():
     return articles
 
 
-def send_email_for_test(articles):
+def send_email_for_fetched_articles(articles):
     subject = '%s - Daily News' % datetime.now().strftime('%Y-%m-%d')
     from_email, to = 'chharry@gmail.com', 'chharry@gmail.com'
     text_content = ''
