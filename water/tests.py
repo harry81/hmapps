@@ -24,11 +24,6 @@ class ArticlesTestCase(TestCase):
         self.rep_790165 = open('water/dumps/790165.html', 'r').read()
         self.rep_790166 = open('water/dumps/790166.html', 'r').read()
 
-        try:
-            os.mkdir(HANI_PATH)
-        except:
-            pass
-
     @requests_mock.mock()
     def test_fetch_news_to_S3(self, m):
         """ It fetches from rss file
@@ -62,5 +57,4 @@ class ArticlesTestCase(TestCase):
         self.assertEqual(len(articles), 3)
 
     def tearDown(self):
-        shutil.rmtree(HANI_PATH)
         self.moto.stop()
