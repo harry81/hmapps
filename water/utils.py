@@ -36,7 +36,12 @@ def _get_filename(item=None):
 def fetch_news_to_S3(url='http://www.hani.co.kr/rss'):
     feeds = requests.get(url)
     output = StringIO(feeds.content)
-    tree = etree.parse(output, etree.XMLParser(encoding='utf-8'))
+
+    try:
+        tree = etree.parse(output)
+
+    except etree.XMLSyntaxError:
+        tree = etree.parse(output, etree.XMLParser(encoding='utf-8'))
 
     for item in tree.xpath('/rss/channel/item'):
         filename, category = _get_filename(item)
