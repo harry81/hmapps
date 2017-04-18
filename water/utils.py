@@ -33,13 +33,12 @@ def _get_filename(item=None):
     return filename, category
 
 
-def fetch_news_to_S3(url='http://www.hani.co.kr/rss'):
+def fetch_news_to_S3(url='http://www.hani.co.kr/rss/'):
     feeds = requests.get(url)
     output = StringIO(feeds.content)
 
     try:
         tree = etree.parse(output)
-
     except etree.XMLSyntaxError:
         tree = etree.parse(output, etree.XMLParser(encoding='utf-8'))
 
@@ -58,11 +57,12 @@ def fetch_news_to_S3(url='http://www.hani.co.kr/rss'):
         fp.close()
 
 
-def load_from_S3():
+def load_from_S3(url='http://www.hani.co.kr/rss/'):
     articles = []
+    prefix = _get_prefix(url)
 
     for ele in default_storage.bucket.list(
-            prefix='hani/%s' % datetime.now().strftime('%Y-%m-%d')):
+            prefix='%s/%s' % (prefix, datetime.now().strftime('%Y-%m-%d'))):
 
         article = {}
         content = ele.read()
@@ -117,3 +117,10 @@ def send_email_for_fetched_articles(articles):
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
     msg.attach_alternative(html_content, "text/html")
     msg.send()
+
+
+def _get_prefix(url):
+    if 'mk' in url:
+        return 'mk'
+    else:
+        return 'hani'
