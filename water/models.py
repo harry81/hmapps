@@ -12,10 +12,6 @@ class Item(models.Model):
     title = models.CharField(max_length=768, blank=True)
     subtitle = models.CharField(max_length=256, blank=True)
     text = models.TextField()
-    row = models.TextField(blank=False)
-    related_articles = models.ManyToManyField('self', blank=True)
 
     publish_at = models.DateTimeField(db_index=True,
-                                      default=timezone.now, blank=True)
-    created_at = models.DateTimeField(db_index=True,
                                       default=timezone.now, blank=True)

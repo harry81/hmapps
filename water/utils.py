@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 from datetime import datetime
 from dateutil.parser import parse
 from django.core.mail import EmailMultiAlternatives
+from .models import Item
 
 
 def _get_filename(item=None):
@@ -124,3 +125,9 @@ def _get_prefix(url):
         return 'mk'
     else:
         return 'hani'
+
+
+def insert_news_to_db(articles):
+    for article in articles:
+        import ipdb; ipdb.set_trace()
+        print article

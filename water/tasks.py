@@ -3,7 +3,8 @@ from main.celery_app import app as celery_app
 from celery.utils.log import get_task_logger
 from water.utils import (fetch_news_to_S3,
                          load_from_S3,
-                         send_email_for_fetched_articles)
+                         send_email_for_fetched_articles,
+                         insert_news_to_db)
 
 logger = get_task_logger(__name__)
 
@@ -20,6 +21,8 @@ def celery_send_email_for_fetched_articles(self,  **kwargs):
 
     url = kwargs.get('url', None)
 
-    fetch_news_to_S3(url=url)
+    # fetch_news_to_S3(url=url)
+    # articles = load_from_S3(url=url)
+    # send_email_for_fetched_articles(articles)
     articles = load_from_S3(url=url)
-    send_email_for_fetched_articles(articles)
+    insert_news_to_db(articles)
