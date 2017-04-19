@@ -162,7 +162,7 @@ INSTALLED_APPS = (
     'djcelery',
 
     'water',
-    'main'
+    'main',
 )
 
 RAVEN_CONFIG = {
