@@ -18,7 +18,7 @@ def _get_filename(item=None):
     url = item.xpath('link/text()')[0]
     published = parse(item.xpath('pubDate/text()')[0])
 
-    if 'www.hani.co.kr' in url:
+    if 'hani.co.kr' in url:
         category = 'hani'
         filename = '%s/%s-%s' % (category,
                                  published.strftime('%Y-%m-%d'),
@@ -129,5 +129,10 @@ def _get_prefix(url):
 
 def insert_news_to_db(articles):
     for article in articles:
-        import ipdb; ipdb.set_trace()
-        print article
+        print article['publish_at']
+        try:
+            article['publish_at'] = datetime.strptime(article['publish_at'][0], '%Y-%m-%d %H:%S')
+        except IndexError:
+            article['publish_at'] = datetime.now()
+
+        Item.objects.create(**article)

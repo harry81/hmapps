@@ -15,3 +15,6 @@ class Item(models.Model):
 
     publish_at = models.DateTimeField(db_index=True,
                                       default=timezone.now, blank=True)
+
+    def __unicode__(self):
+        return u'%s' % (self.title)

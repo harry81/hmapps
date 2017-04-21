@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import requests_mock
-from django.core import mail
 import os
 import boto
+import json
+from django.core import mail
 from datetime import datetime
 from django.test import TestCase
-from water.utils import fetch_news_to_S3, load_from_S3, send_email_for_fetched_articles
+from water.utils import (fetch_news_to_S3,
+                         load_from_S3, send_email_for_fetched_articles,
+                         insert_news_to_db)
 from water.tasks import celery_send_email_for_fetched_articles
 from django.core.files.storage import default_storage
 from moto import mock_s3
@@ -28,13 +31,18 @@ class ArticlesTestCase(TestCase):
         self.rep_245273 = open('water/dumps/245273.html', 'r').read()
         self.rep_245393 = open('water/dumps/245393.html', 'r').read()
 
+    def test_insert_news_to_db(self):
+        fp = open('water/dumps/articles.txt', 'r')
+        articles = json.loads(fp.read())
+        insert_news_to_db(articles)
+
     @requests_mock.mock()
     def test_fetch_news_to_S3(self, m):
         # It fetches from rss file
         # parses the root rss file properly
         # save the content of link in rss into S3
 
-        m.get('http://www.hani.co.kr/rss',
+        m.get('http://www.hani.co.kr/rss/',
               text=self.rep_hani_rss.decode('utf8'))
         m.get('http://www.hani.co.kr/arti/society/labor/790164.html',
               text=self.rep_790164.decode('utf8'))
