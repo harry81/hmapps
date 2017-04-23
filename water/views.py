@@ -8,7 +8,7 @@ from .models import Item
 
 
 def index(request):
-    items = Item.objects.all()
+    items = Item.objects.all().order_by('-publish_at')[:60]
     return render(request, 'water/list.html', {
         'items': items,
         'error_message': "You didn't select a choice.",
