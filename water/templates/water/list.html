@@ -1,9 +1,26 @@
-<div style="width:1024px; line-height: 200%;">
-{% for item in items %}
-<b>{{item.title}}</b><br>
-{{item.subtitle}} {{item.publish_at}}<br>
-<p>{{item.text}}</p>
-<hr>
+{% load static %}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>HMapps</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static "water/hmapps.css" %}"  rel="stylesheet">
+  </head>
+  <body >
 
-{% endfor %}
-</div>
+    <div>
+      {% for item in items %}
+      <b >{{item.title}}</b>
+      <p>{{item.subtitle}}</p>
+      <p>
+        {{item.publish_at}}</p>
+      <p class="caption">{{item.text}}</p>
+      <hr>
+
+      {% endfor %}
+    </div>
+  </body>
+</html>
