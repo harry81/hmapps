@@ -9,15 +9,15 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static "water/hmapps.css" %}"  rel="stylesheet">
   </head>
-  <body >
+  <body style="margin:10px">
 
     <div>
       {% for item in items %}
-      <b >{{item.title}}</b>
+      <h4 class="title">{{item.title}}</h4>
       <p>{{item.subtitle}}</p>
       <p>
         {{item.publish_at}}</p>
-      <p class="caption">{{item.text}}</p>
+      <p class="text">{{item.text}}</p>
       <hr>
 
       {% endfor %}
