@@ -23,5 +23,5 @@ def celery_send_email_for_fetched_articles(self,  **kwargs):
 
     fetch_news_to_S3(url=url)
     articles = load_from_S3(url=url)
-    send_email_for_fetched_articles(articles)
     insert_news_to_db(articles)
+    send_email_for_fetched_articles(articles)

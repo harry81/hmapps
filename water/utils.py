@@ -65,40 +65,10 @@ def load_from_S3(url='http://www.hani.co.kr/rss/'):
     for ele in default_storage.bucket.list(
             prefix='%s/%s' % (prefix, datetime.now().strftime('%Y-%m-%d'))):
 
-        article = {}
-        content = ele.read()
-        root = etree.HTML(content)
+        article = eval('_parse_%s' % prefix)(ele)
 
-        try:
-            article['url'] = root.xpath(
-                '//meta[@property="og:url"]/@content')[0]
-            article['title'] = root.xpath('//title/text()')[0]
-
-            subtitle = root.xpath('//div[@class="subtitle"]/text()')
-            subtitle = '\n'.join(map(lambda x: x.strip(), subtitle))
-
-            article['subtitle'] = subtitle
-
-            text = root.xpath('//div[@class="text"]/text()')
-            if len(text) == 0:
-                text = root.xpath('//div[@class="article-contents"]/text()')
-
-            text = '\n'.join(map(lambda x: x.strip(), text)).strip()
-            article['text'] = text
-
-            try:
-                publish_at = root.xpath('//p[@class="date-time"]/span/text()')
-
-            except ValueError:
-                publish_at = root.xpath('//p[@class="date"]/span/text()')
-
-            article['publish_at'] = publish_at
-
+        if article:
             articles.append(article)
-
-        except IndexError as e:
-            print e
-
     return articles
 
 
@@ -130,9 +100,75 @@ def _get_prefix(url):
 def insert_news_to_db(articles):
     for article in articles:
         print article['publish_at']
-        try:
-            article['publish_at'] = datetime.strptime(article['publish_at'][0], '%Y-%m-%d %H:%S')
-        except IndexError:
-            article['publish_at'] = datetime.now()
-
         Item.objects.create(**article)
+
+
+def _parse_hani(ele):
+    content = ele.read()
+    root = etree.HTML(content)
+
+    article = {}
+
+    try:
+        article['url'] = root.xpath(
+            '//meta[@property="og:url"]/@content')[0]
+        article['title'] = root.xpath('//title/text()')[0]
+
+        subtitle = root.xpath('//div[@class="subtitle"]/text()')
+        subtitle = '\n'.join(map(lambda x: x.strip(), subtitle))
+
+        article['subtitle'] = subtitle
+
+        text = root.xpath('//div[@class="text"]/text()')
+        if len(text) == 0:
+            text = root.xpath('//div[@class="article-contents"]/text()')
+
+        text = '\n'.join(map(lambda x: x.strip(), text)).strip()
+        article['text'] = text
+
+        try:
+            publish_at = root.xpath('//p[@class="date-time"]/span/text()')
+
+        except ValueError:
+            publish_at = root.xpath('//p[@class="date"]/span/text()')
+
+        article['publish_at'] = datetime.strptime(publish_at[0], '%Y-%m-%d %H:%M')
+
+    except IndexError as e:
+        print e
+
+    return article
+
+
+def _parse_mk(ele):
+    content = ele.read()
+    root = etree.HTML(content)
+
+    article = {}
+
+    try:
+        article['url'] = root.xpath(
+            '//meta[@property="og:url"]/@content')[0]
+        article['title'] = root.xpath('//title/text()')[0]
+        article['subtitle'] = '\n'.join(root.xpath('//h2[@class="sub_title1"]/text()'))
+
+        text = root.xpath("//div[@class='art_txt']/text()")
+
+        if len(text) == 0:
+            text = root.xpath('//div[@class="article-contents"]/text()')
+
+        text = '\n'.join(map(lambda x: x.strip(), text)).strip()
+        article['text'] = text
+
+        publish_at = root.xpath('//li[@class="lasttime"]/text()')[0].split(':', 1)[1].strip()
+        article['publish_at'] = datetime.strptime(publish_at, '%Y.%m.%d %H:%M:%S')
+
+    except UnicodeEncodeError as e:
+        print e
+        return
+
+    except IndexError as e:
+        print e
+        return
+
+    return article
