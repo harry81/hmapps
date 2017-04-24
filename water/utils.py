@@ -112,7 +112,7 @@ def _parse_hani(ele):
     try:
         article['url'] = root.xpath(
             '//meta[@property="og:url"]/@content')[0]
-        article['title'] = root.xpath('//title/text()')[0]
+        article['title'] = root.xpath('//title/text()')[0].replace(u' : 뉴스 : 한겨레', '')
 
         subtitle = root.xpath('//div[@class="subtitle"]/text()')
         subtitle = '\n'.join(map(lambda x: x.strip(), subtitle))
@@ -149,7 +149,7 @@ def _parse_mk(ele):
     try:
         article['url'] = root.xpath(
             '//meta[@property="og:url"]/@content')[0]
-        article['title'] = root.xpath('//title/text()')[0]
+        article['title'] = root.xpath('//title/text()')[0].replace('MK News - ', '')
         article['subtitle'] = '\n'.join(root.xpath('//h2[@class="sub_title1"]/text()'))
 
         text = root.xpath("//div[@class='art_txt']/text()")
