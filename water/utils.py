@@ -106,8 +106,7 @@ def insert_news_to_db(articles):
 def _parse_hani(ele):
     content = ele.read()
     root = etree.HTML(content)
-
-    article = {}
+    article = {'publisher': 'h'}
 
     try:
         article['url'] = root.xpath(
@@ -143,8 +142,7 @@ def _parse_hani(ele):
 def _parse_mk(ele):
     content = ele.read()
     root = etree.HTML(content)
-
-    article = {}
+    article = {'publisher': 'm'}
 
     try:
         article['url'] = root.xpath(

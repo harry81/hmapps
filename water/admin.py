@@ -3,7 +3,8 @@ from .models import Item
 
 
 class ItemAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("title", "publisher",
+                    "publish_at")
 
 
 admin.site.register(Item, ItemAdmin)

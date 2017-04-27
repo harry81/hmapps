@@ -18,3 +18,8 @@ class Item(models.Model):
 
     def __unicode__(self):
         return u'%s' % (self.title)
+
+    def save(self, *args, **kwargs):
+        if isinstance(self.publish_at, list):
+            self.publish_at = self.publish_at[0]
+        super(Item, self).save(*args, **kwargs)

@@ -13,6 +13,8 @@ from water.tasks import celery_send_email_for_fetched_articles
 from django.core.files.storage import default_storage
 from moto import mock_s3
 
+from .models import Item
+
 
 class ArticlesTestCase(TestCase):
     def setUp(self):
@@ -66,9 +68,12 @@ class ArticlesTestCase(TestCase):
         articles = load_from_S3()
         self.assertEqual(len(articles), 6)
 
+        for article in articles:
+            self.assertTrue(article['publisher'] in [ele[0] for ele in Item.PUBLISHER_CHOICES])
+
         send_email_for_fetched_articles(articles)
         mail_article = mail.outbox.pop()
-        self.assertIn(u'한겨레', mail_article.body)
+        self.assertIn(u'hani', mail_article.body)
 
     @requests_mock.mock()
     def test_celery_send_email_for_fetched_articles(self, m):
