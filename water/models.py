@@ -5,7 +5,7 @@ from django.utils import timezone
 class Item(models.Model):
     PUBLISHER_CHOICES = (
         ('h', 'hanis'),
-        ('c', 'mk'),
+        ('m', 'mk'),
     )
     url = models.CharField(max_length=256)
     publisher = models.CharField(max_length=1, choices=PUBLISHER_CHOICES)
