@@ -99,7 +99,6 @@ def _get_prefix(url):
 
 def insert_news_to_db(articles):
     for article in articles:
-        print article['publish_at']
         Item.objects.update_or_create(url=article['url'], defaults=article)
 
 

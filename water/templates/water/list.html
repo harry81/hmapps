@@ -1,16 +1,8 @@
-{% load static %}
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>HMapps</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static "water/hmapps.css" %}"  rel="stylesheet">
-  </head>
-  <body style="margin:10px">
+{% extends "base.html" %}
 
+{% block title %}Hmapps{% endblock title %}
+
+{% block content %}
     <div>
       {% for item in items %}
       <h4 class="title">{{item.title}}</h4>
@@ -22,5 +14,5 @@
 
       {% endfor %}
     </div>
-  </body>
-</html>
+
+{% endblock content %}
