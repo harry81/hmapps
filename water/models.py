@@ -10,6 +10,7 @@ class Item(models.Model):
     url = models.CharField(max_length=256)
     publisher = models.CharField(max_length=1, choices=PUBLISHER_CHOICES)
     title = models.CharField(max_length=768, blank=True)
+    category = models.CharField(max_length=128, blank=True)
     subtitle = models.CharField(max_length=256, blank=True)
     text = models.TextField()
 

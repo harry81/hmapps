@@ -5,7 +5,7 @@
 {% block content %}
     <div>
       {% for item in items %}
-      <h4 class="title">{{item.title}}</h4>
+      <h4 id="{{item.id}}" class="title">{{item.title}}</h4>{{item.publisher}}
       <p>{{item.subtitle}}</p>
       <p>
         {{item.publish_at}}</p>

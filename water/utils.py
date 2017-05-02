@@ -99,7 +99,10 @@ def _get_prefix(url):
 
 def insert_news_to_db(articles):
     for article in articles:
-        Item.objects.update_or_create(url=article['url'], defaults=article)
+        try:
+            Item.objects.update_or_create(url=article['url'], defaults=article)
+        except:
+            print "Problem in Inserting"
 
 
 def _parse_hani(ele):
