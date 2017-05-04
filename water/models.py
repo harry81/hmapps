@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.postgres.fields import ArrayField
 
 
 class Item(models.Model):
@@ -13,7 +14,11 @@ class Item(models.Model):
     category = models.CharField(max_length=128, blank=True)
     subtitle = models.CharField(max_length=256, blank=True)
     text = models.TextField()
-
+    imgs = ArrayField(
+        models.CharField(max_length=256, blank=True),
+        size=8,
+        null=True
+    )
     publish_at = models.DateTimeField(db_index=True,
                                       default=timezone.now, blank=True)
 

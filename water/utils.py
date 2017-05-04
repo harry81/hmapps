@@ -135,6 +135,7 @@ def _parse_hani(ele):
             publish_at = root.xpath('//p[@class="date"]/span/text()')
 
         article['publish_at'] = datetime.strptime(publish_at[0], '%Y-%m-%d %H:%M')
+        article['imgs'] = root.xpath('//div[@class="image"]/img/@src')
 
     except IndexError as e:
         print e
@@ -163,6 +164,7 @@ def _parse_mk(ele):
 
         publish_at = root.xpath('//li[@class="lasttime"]/text()')[0].split(':', 1)[1].strip()
         article['publish_at'] = datetime.strptime(publish_at, '%Y.%m.%d %H:%M:%S')
+        article['imgs'] = root.xpath('//div[@class="img_center"]/img/@src')
 
     except UnicodeEncodeError as e:
         print e
