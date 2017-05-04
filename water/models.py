@@ -25,6 +25,11 @@ class Item(models.Model):
     def __unicode__(self):
         return u'%s' % (self.title)
 
+    def get_image(self):
+        if self.imgs:
+            return self.imgs[0]
+        return None
+
     def save(self, *args, **kwargs):
 
         if isinstance(self.publish_at, list):

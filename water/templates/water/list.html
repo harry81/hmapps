@@ -7,6 +7,13 @@
       {% for item in items %}
       <h4 id="{{item.id}}" class="title">{{item.title}}</h4>{{item.publisher}}
       <p>{{item.subtitle}}</p>
+
+      {% if item.get_image %}
+      <p>
+        <img src="{{item.get_image}}" style="max-width:100%;">
+      </p>
+      {% endif %}
+
       <p>
         {{item.publish_at}}</p>
       <p class="text">{{item.text}}</p>
