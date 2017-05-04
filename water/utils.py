@@ -100,7 +100,8 @@ def _get_prefix(url):
 def insert_news_to_db(articles):
     for article in articles:
         try:
-            Item.objects.update_or_create(url=article['url'], defaults=article)
+            item, created = Item.objects.update_or_create(url=article['url'], defaults=article)
+            print item, created
         except:
             print "Problem in Inserting"
 
