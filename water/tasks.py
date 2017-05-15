@@ -19,19 +19,11 @@ def celery_send_email_for_fetched_articles(self,  **kwargs):
     # {"url": "http://file.mk.co.kr/news/rss/rss_30100041.xml"}
     # {"url": "http://www.hani.co.kr/rss/"}
 
-    url = kwargs.get('url', None)
-
-    fetch_news_to_S3(url=url)
-    articles = load_from_S3(url=url)
-    insert_news_to_db(articles)
-    send_email_for_fetched_articles(articles)
-
-
-@celery_app.task(bind=True)
-def fetch_articles(self,  **kwargs):
     urls = kwargs.get('url', None)
 
     for url in urls.split(','):
         fetch_news_to_S3(url=url)
         articles = load_from_S3(url=url)
         insert_news_to_db(articles)
+
+    send_email_for_fetched_articles(articles)
