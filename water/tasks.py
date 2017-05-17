@@ -21,7 +21,7 @@ def celery_send_email_for_fetched_articles(self,  **kwargs):
 
     urls = kwargs.get('url', None)
 
-    for url in urls.split(','):
+    for url in urls:
         fetch_news_to_S3(url=url)
         articles = load_from_S3(url=url)
         insert_news_to_db(articles)

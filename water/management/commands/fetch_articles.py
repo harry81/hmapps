@@ -10,9 +10,7 @@ class Command(BaseCommand):
         parser.add_argument('--url', nargs='+')
 
     def handle(self, *args, **options):
-        kwargs = {}
-        for url in options['url']:
-            kwargs['url'] = url
-
-            url = kwargs.get('url', None)
-            celery_send_email_for_fetched_articles(**kwargs)
+        kwargs = {
+            'url': options['url'][0].split(',')
+        }
+        celery_send_email_for_fetched_articles(**kwargs)
