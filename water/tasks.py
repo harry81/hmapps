@@ -18,10 +18,9 @@ def celery_test(self,  **kwargs):
 def celery_send_email_for_fetched_articles(self,  **kwargs):
     # {"url": "http://file.mk.co.kr/news/rss/rss_30100041.xml"}
     # {"url": "http://www.hani.co.kr/rss/"}
-
     urls = kwargs.get('url', None)
 
-    if isinstance(urls, str):
+    if not isinstance(urls, list):
         urls = urls,
 
     for url in urls:
