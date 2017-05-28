@@ -162,6 +162,7 @@ INSTALLED_APPS = (
     'djcelery',
 
     'water',
+    'earth',
     'main',
 )
 
