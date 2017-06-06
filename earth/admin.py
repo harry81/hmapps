@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Address, AddressCode, Deal
+from .models import Address, AddressCode, Deal, Location
 
 
 class AddressAdmin(admin.ModelAdmin):
@@ -18,8 +18,14 @@ admin.site.register(AddressCode, AddressCodeAdmin)
 
 
 class DealAdmin(admin.ModelAdmin):
-    list_display = ("bldg_nm", "sum_amount", "dong", "deal_dd", "bldg_area")
-    pass
+    list_display = ("bldg_nm", "bldg_area", "sum_amount", "dong", "bobn", "deal_dd")
 
 
 admin.site.register(Deal, DealAdmin)
+
+
+class LocationAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Location, LocationAdmin)

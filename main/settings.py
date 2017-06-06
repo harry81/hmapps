@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.admin',
     'django.contrib.sites',
+    'django.contrib.gis',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
     'django.contrib.messages',
