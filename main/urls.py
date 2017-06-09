@@ -16,7 +16,7 @@ from earth.views import DealViewSet
 admin.autodiscover()
 
 router = routers.SimpleRouter()
-router.register(r'earth', DealViewSet)
+router.register(r'earth/deal', DealViewSet)
 
 urlpatterns = [
     url(r'^sitemap\.xml$', sitemap,
