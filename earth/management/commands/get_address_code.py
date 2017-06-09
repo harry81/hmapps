@@ -104,12 +104,10 @@ def process_deal(resp):
     
 
 class Command(BaseCommand):
-    help = "My shiny new management command."
-
     def handle(self, *args, **options):
         addr = dict.fromkeys(['sidoCode', 'gugunCode', 'dongCode', 'danjiCode'])
         SI = [
-            {"CODE": "46", "NAME": u"전라남도"},
+            {"CODE": "11", "NAME": u"서울특별시"},
         ]
 
         for si in SI:
@@ -117,6 +115,9 @@ class Command(BaseCommand):
             guns = get_gugunlist(si)
             for gun in guns:
                 addr['gugunCode'] = gun['CODE']
+                print gun['CODE'], gun['NAME']
+                import ipdb; ipdb.set_trace()
+                continue
 
                 dongs = get_donglist(gun)
                 for dong in dongs:
@@ -124,6 +125,7 @@ class Command(BaseCommand):
                     danjis = get_danjicombo(**addr)
 
                     for danji in danjis:
+                        import ipdb; ipdb.set_trace()
                         addr['danjiCode'] = danji['CODE']
                         resp = get_list(**addr)
                         print "%s %s %s %s" % (si['NAME'], gun['NAME'], dong['NAME'], danji['NAME'])

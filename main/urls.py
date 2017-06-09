@@ -9,8 +9,14 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.static import serve
+from rest_framework import routers
+
+from earth.views import DealViewSet
 
 admin.autodiscover()
+
+router = routers.SimpleRouter()
+router.register(r'earth', DealViewSet)
 
 urlpatterns = [
     url(r'^sitemap\.xml$', sitemap,
@@ -20,6 +26,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     url(r'^admin/', include(admin.site.urls)),  # NOQA
     url(r'^water/', include('water.urls', namespace='water')),
+    url(r'api/', include(router.urls)),
     url(r'^', include('cms.urls')),
 )
 
