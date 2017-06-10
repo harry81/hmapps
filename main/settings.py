@@ -27,7 +27,7 @@ SECRET_KEY = 'cv1u$8mv(+k4o507gc80jp@=%rb4o@cg&sh@2r5cz#pfb8z5ak'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
     'hmapps.gv34rimdzh.ap-northeast-2.elasticbeanstalk.com',
     'localhost:4200',
@@ -115,6 +115,7 @@ MIDDLEWARE_CLASSES = (
     'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
     'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'cms.middleware.utils.ApphookReloadMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -161,6 +162,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'storages',
     'djcelery',
+    'corsheaders',
 
     'water',
     'earth',
