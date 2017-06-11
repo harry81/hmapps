@@ -32,7 +32,7 @@ CORS_ORIGIN_WHITELIST = (
     'hmapps.gv34rimdzh.ap-northeast-2.elasticbeanstalk.com',
     'localhost:4200',
     'hmapps.healworld.co.kr',
-    'earth.healworld.co.kr'
+    'earth.healworld.co.kr',
     'localhost',
     '127.0.0.1:8100'
 )

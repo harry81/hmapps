@@ -102,3 +102,4 @@ websocket-client==0.40.0
 Werkzeug==0.12.1
 xmltodict==0.10.2
 yapf==0.16.2
+django-cors-headers==2.1.0
