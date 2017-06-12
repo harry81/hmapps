@@ -11,12 +11,13 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.static import serve
 from rest_framework import routers
 
-from earth.views import DealViewSet
+from earth.views import DealViewSet, LocationViewSet
 
 admin.autodiscover()
 
 router = routers.SimpleRouter()
 router.register(r'earth/deal', DealViewSet)
+router.register(r'earth/location', LocationViewSet)
 
 urlpatterns = [
     url(r'^sitemap\.xml$', sitemap,
