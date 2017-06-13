@@ -5,7 +5,8 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Compiling the Python code...
-      - python HelloWorld_tst.py
+      - echo `which python`
+      - python manage.py test --noinput
   post_build:
     commands:
       - echo Build completed on `date`
