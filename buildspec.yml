@@ -1,16 +1,18 @@
 version: 0.2
 
+environment_variables:
+  plaintext:
+    SECRET_KEY: nosecret
+
 phases:
-  build:
+  install:
     commands:
-      - echo Build started on `date`
-      - echo Compiling the Python code...
-      - echo `which python`
-      - echo `ls -al`
-      - echo `pwd`
+      - apt-get update -y
+      - apt-get install -y curl wget python-pip python-dev build-essential 
+  pre_build:
+    commands:
+      - pip install -r requirements.txt
+      - python manage.py test --noinput
   post_build:
     commands:
       - echo Build completed on `date`
-artifacts:
-  files:
-    - HelloWorld.py
