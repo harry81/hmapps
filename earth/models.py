@@ -74,10 +74,37 @@ class Deal(models.Model):
                     point=point, defaults={"point": point}, **item)
 
                 self.location = location
-
                 self.save(update_fields=['location'])
+                print location, created
 
             except IntegrityError as e:
                 import ipdb; ipdb.set_trace()
 
         return "%s" % (self.pk)
+
+    def save(self, *args, **kwargs):
+        url = "https://openapi.naver.com/v1/map/geocode?query=%s %s" % (self.dong, self.bobn)
+
+        headers = {
+            "X-Naver-Client-Id": client_id,
+            "X-Naver-Client-Secret": client_secret
+        }
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            item = flatten_dict(response.json()['result']['items'][0])
+            point_dict = item.pop('point', None)
+            point = Point(**point_dict)
+
+            try:
+                location, created = Location.objects.get_or_create(
+                    point=point, defaults={"point": point}, **item)
+
+                self.location = location
+
+            except IntegrityError as e:
+                import ipdb; ipdb.set_trace()
+
+        response = super(Deal, self).save(*args, **kwargs)
+        return response
