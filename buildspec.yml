@@ -8,11 +8,11 @@ phases:
   install:
     commands:
       - apt-get update -y
-      - apt-get install -y curl wget python-pip python-dev build-essential 
+      - apt-get install -y curl wget python-pip python-dev build-essential binutils libproj-dev gdal-bin
   pre_build:
     commands:
       - pip install -r requirements.txt
-      - python manage.py test --noinput
+      - python manage.py test --noinput -v 3
   post_build:
     commands:
       - echo Build completed on `date`
