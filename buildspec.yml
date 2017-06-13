@@ -6,7 +6,8 @@ phases:
       - echo Build started on `date`
       - echo Compiling the Python code...
       - echo `which python`
-      - python manage.py test --noinput
+      - echo `ls -al`
+      - echo `pwd`
   post_build:
     commands:
       - echo Build completed on `date`
