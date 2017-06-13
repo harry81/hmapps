@@ -1,3 +1,4 @@
+import django_filters
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from .models import Deal, Location
@@ -12,6 +13,8 @@ class DealViewSet(mixins.CreateModelMixin,
 
     queryset = Deal.objects.all()
     serializer_class = DealSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_fields = ('location', )
 
 
 class LocationViewSet(ModelViewSet):

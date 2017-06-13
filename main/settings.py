@@ -164,6 +164,7 @@ INSTALLED_APPS = (
     'storages',
     'djcelery',
     'corsheaders',
+    'django_filters',
 
     'water',
     'earth',
