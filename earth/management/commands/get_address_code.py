@@ -101,10 +101,30 @@ def process_deal(resp):
             deals = line[monthlist]
             for deal in deals:
                 print deal['BLDG_NM'], deal['SUM_AMT'], deal['BLDG_AREA'], deal['APTFNO'], deal['DEAL_MM']
+
+
+# curl http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev\?LAWD_CD\=47190\&DEAL_YMD\=201701\&numOfRows\=1000\&serviceKey\=auRRfe7N35QzfgB8TuK41hLH%2Bsjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w%3D%3D | xmllint --format - > detail_47190_201701.xml
+
+def get_deal(year=2017, gugunCode=10117, name=None):
+    url_get_deals = "http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev"
     
+    params={
+        "LAWD_CD": gugunCode,
+        "DEAL_YMD": year,
+        "numOfRows": 1000,
+        "serviceKey": "auRRfe7N35QzfgB8TuK41hLH+sjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w=="
+    }
+    response = requests.get(url_get_deals, params=params)
+    filename = "%s.xml" % name
+    with open("list/%s" % filename, 'wt') as fp:
+        fp.write(response.content)
+    
+    return filename
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        year = "201701"
         addr = dict.fromkeys(['sidoCode', 'gugunCode', 'dongCode', 'danjiCode'])
         SI = [
             {"CODE": "11", "NAME": u"서울특별시"},
@@ -116,19 +136,19 @@ class Command(BaseCommand):
             for gun in guns:
                 addr['gugunCode'] = gun['CODE']
                 print gun['CODE'], gun['NAME']
-                import ipdb; ipdb.set_trace()
-                continue
+                
 
-                dongs = get_donglist(gun)
-                for dong in dongs:
-                    addr['dongCode'] = dong['CODE']
-                    danjis = get_danjicombo(**addr)
+                name = "list_%s_%s_%s_%s" % (year, addr["gugunCode"], si['NAME'], gun['NAME'])
+                print name
+                res = get_deal(year=year, gugunCode=addr['gugunCode'], name=name)
 
-                    for danji in danjis:
-                        import ipdb; ipdb.set_trace()
-                        addr['danjiCode'] = danji['CODE']
-                        resp = get_list(**addr)
-                        print "%s %s %s %s" % (si['NAME'], gun['NAME'], dong['NAME'], danji['NAME'])
-                        print resp
+                # dongs = get_donglist(gun)
+                # for dong in dongs:
+                #     addr['dongCode'] = dong['CODE']
+                #     danjis = get_danjicombo(**addr)
+                    
 
-                        process_deal(resp)
+                    # for danji in danjis:
+                    #     addr['danjiCode'] = danji['CODE']
+                    #     resp = get_list(**addr)
+
