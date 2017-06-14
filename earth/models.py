@@ -24,6 +24,7 @@ class AddressCode(models.Model):
 
 
 class Location(models.Model):
+    name = models.CharField(max_length=64, null=True, blank=True)
     point = models.PointField(default='POINT (0 0)', srid=4326)
     isRoadAddress = models.CharField(max_length=32, null=True, blank=True)
     country = models.CharField(max_length=32, null=True, blank=True)
@@ -99,7 +100,7 @@ class Deal(models.Model):
 
             try:
                 location, created = Location.objects.get_or_create(
-                    point=point, defaults={"point": point}, **item)
+                    point=point, name=self.bldg_nm, defaults={"point": point}, **item)
 
                 self.location = location
 
