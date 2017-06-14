@@ -3,6 +3,19 @@ import xmltodict
 import requests
 from django.core.management.base import BaseCommand
 from earth.utils import rename_fields
+from os import listdir
+from os.path import isfile, join
+
+
+def import_deals(url, origin):
+        deals_as_string = open(origin, 'r').read()
+        deals = xmltodict.parse(deals_as_string)
+
+        for item in deals['response']['body']['items']['item']:
+            item = rename_fields(item)
+            item['origin'] = origin
+            res = requests.post("%s/en/api/earth/deal/" % url, data=item)
+            print item, res
 
 
 class Command(BaseCommand):
@@ -15,10 +28,10 @@ class Command(BaseCommand):
         if options['url']:
             url = options['url'][0]
 
-        deals_as_string = open('list_47190_201701.xml', 'r').read()
-        deals = xmltodict.parse(deals_as_string)
+        list_path = 'list'
 
-        for item in deals['response']['body']['items']['item']:
-            item = rename_fields(item)
-            res = requests.post("%s/en/api/earth/deal/" % url, data=item)
-            print item, res
+        onlyfiles = [f for f in listdir(list_path) if isfile(join(list_path, f))]
+
+        for dest in onlyfiles:
+            filename = "%s/%s" % (list_path, dest)
+            import_deals(url, filename)
