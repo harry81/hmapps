@@ -103,3 +103,5 @@ db.sqlite3
 
 /static
 /djcelery.schedulers.DatabaseScheduler
+/list
+/doc

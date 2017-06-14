@@ -1,6 +1,7 @@
 import django_filters
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework_gis.filters import DistanceToPointFilter
 from .models import Deal, Location
 from .serializers import DealSerializer, LocationSerializer
 
@@ -21,3 +22,5 @@ class LocationViewSet(ModelViewSet):
 
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    distance_filter_field = 'point'
+    filter_backends = (DistanceToPointFilter, )
