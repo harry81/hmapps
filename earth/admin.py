@@ -24,8 +24,14 @@ class DealAdmin(admin.ModelAdmin):
 admin.site.register(Deal, DealAdmin)
 
 
+class DealInline(admin.TabularInline):
+    model = Deal
+
+
 class LocationAdmin(admin.ModelAdmin):
-    pass
+
+    list_display = ("name", "sido", "sigugun", "dongmyun", "rest", "num_of_deals")
+    inlines = [DealInline]
 
 
 admin.site.register(Location, LocationAdmin)

@@ -12,10 +12,15 @@ def import_deals(url, origin):
         deals = xmltodict.parse(deals_as_string)
 
         for item in deals['response']['body']['items']['item']:
-            item = rename_fields(item)
+            try:
+                item = rename_fields(item)
+            except KeyError as e:
+                print e
+                continue
+
             item['origin'] = origin
             res = requests.post("%s/en/api/earth/deal/" % url, data=item)
-            print item, res
+            print "{origin}-{bldg_nm} {area_cd} {bobn} {sum_amount} {dong}".format(**item), res
 
 
 class Command(BaseCommand):

@@ -37,6 +37,9 @@ class Location(models.Model):
     def __unicode__(self):
         return "%s %s %s" % (self.dongmyun, self.sido, self.rest)
 
+    def num_of_deals(self):
+        return self.deals.count()
+
 
 class Deal(models.Model):
     sum_amount = models.IntegerField(u'거래금액')
