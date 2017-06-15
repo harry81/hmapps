@@ -11,6 +11,9 @@ def import_deals(url, origin):
         deals_as_string = open(origin, 'r').read()
         deals = xmltodict.parse(deals_as_string)
 
+        if len(deals_as_string) < 2048:
+                return
+
         for item in deals['response']['body']['items']['item']:
             try:
                 item = rename_fields(item)
@@ -26,6 +29,7 @@ def import_deals(url, origin):
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--url', nargs='+')
+        parser.add_argument('--when')
 
     def handle(self, *args, **options):
         url = 'http://localhost:8001'
@@ -33,7 +37,10 @@ class Command(BaseCommand):
         if options['url']:
             url = options['url'][0]
 
-        list_path = 'list'
+        if options['when']:
+            when = options['when']
+
+        list_path = 'list/%s' % when
 
         onlyfiles = [f for f in listdir(list_path) if isfile(join(list_path, f))]
 

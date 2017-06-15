@@ -24,3 +24,4 @@ class LocationViewSet(ModelViewSet):
     serializer_class = LocationSerializer
     distance_filter_field = 'point'
     filter_backends = (DistanceToPointFilter, )
+    distance_filter_convert_meters = True

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import os
 import requests
 from django.core.management.base import BaseCommand
 from earth.models import Address, AddressCode
@@ -106,49 +107,54 @@ def process_deal(resp):
 # curl http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev\?LAWD_CD\=47190\&DEAL_YMD\=201701\&numOfRows\=1000\&serviceKey\=auRRfe7N35QzfgB8TuK41hLH%2Bsjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w%3D%3D | xmllint --format - > detail_47190_201701.xml
 
 def get_deal(year=2017, gugunCode=10117, name=None):
+    try:
+        os.mkdir('list/%s' % year)
+    except OSError:
+        pass
+        
+    filename = "%s.xml" % name
+    full_path = "list/%s/%s" % (year, filename)
+    if os.path.isfile(full_path):
+        if os.path.getsize(full_path) > 300:
+            print "Already exists %s" % filename
+            return
+
     url_get_deals = "http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev"
-    
-    params={
+
+    params = {
         "LAWD_CD": gugunCode,
         "DEAL_YMD": year,
         "numOfRows": 1000,
         "serviceKey": "auRRfe7N35QzfgB8TuK41hLH+sjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w=="
     }
     response = requests.get(url_get_deals, params=params)
-    filename = "%s.xml" % name
-    with open("list/%s" % filename, 'wt') as fp:
+    with open(full_path, 'wt') as fp:
         fp.write(response.content)
     
     return filename
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--when'
+        )
+
     def handle(self, *args, **options):
-        year = "201701"
+        if not options['when']:
+            return None
+
+        year = options['when']
         addr = dict.fromkeys(['sidoCode', 'gugunCode', 'dongCode', 'danjiCode'])
-        SI = [
-            {"CODE": "11", "NAME": u"서울특별시"},
-        ]
+        # SI = [
+        #     {"CODE": "11", "NAME": u"서울특별시"},
+        # ]
 
         for si in SI:
             addr['sidoCode'] = si['CODE']
             guns = get_gugunlist(si)
             for gun in guns:
                 addr['gugunCode'] = gun['CODE']
-                print gun['CODE'], gun['NAME']
-                
-
                 name = "list_%s_%s_%s_%s" % (year, addr["gugunCode"], si['NAME'], gun['NAME'])
-                print name
                 res = get_deal(year=year, gugunCode=addr['gugunCode'], name=name)
-
-                # dongs = get_donglist(gun)
-                # for dong in dongs:
-                #     addr['dongCode'] = dong['CODE']
-                #     danjis = get_danjicombo(**addr)
-                    
-
-                    # for danji in danjis:
-                    #     addr['danjiCode'] = danji['CODE']
-                    #     resp = get_list(**addr)
-
+                print res
