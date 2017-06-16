@@ -19,6 +19,7 @@ admin.site.register(AddressCode, AddressCodeAdmin)
 
 class DealAdmin(admin.ModelAdmin):
     list_display = ("bldg_nm", "bldg_area", "sum_amount", "dong", "bobn", "deal_dd")
+    list_filter = ("deal_yy", "deal_mm", "deal_dd")
 
 
 admin.site.register(Deal, DealAdmin)

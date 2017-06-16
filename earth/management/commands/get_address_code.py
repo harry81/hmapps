@@ -146,15 +146,26 @@ class Command(BaseCommand):
 
         year = options['when']
         addr = dict.fromkeys(['sidoCode', 'gugunCode', 'dongCode', 'danjiCode'])
-        # SI = [
-        #     {"CODE": "11", "NAME": u"서울특별시"},
-        # ]
+        SI = [
+            {"CODE": "11", "NAME": u"서울특별시"},
+            {"CODE": "47", "NAME": u"경상북도"},
+        ]
 
         for si in SI:
             addr['sidoCode'] = si['CODE']
             guns = get_gugunlist(si)
             for gun in guns:
                 addr['gugunCode'] = gun['CODE']
-                name = "list_%s_%s_%s_%s" % (year, addr["gugunCode"], si['NAME'], gun['NAME'])
-                res = get_deal(year=year, gugunCode=addr['gugunCode'], name=name)
-                print res
+                if len(year) == 4:
+                    for x in range(1, 13):
+                        year_month = "%s%02d" % (year, x)
+                        name = "list_%s_%s_%s_%s" % (year_month, addr["gugunCode"], si['NAME'], gun['NAME'])
+                        res = get_deal(year=year_month, gugunCode=addr['gugunCode'], name=name)
+                        print res
+
+                else:
+                    year_month = "%s" % (year)
+                    name = "list_%s_%s_%s_%s" % (year_month, addr["gugunCode"], si['NAME'], gun['NAME'])
+                    res = get_deal(year=year_month, gugunCode=addr['gugunCode'], name=name)
+                    print res
+
