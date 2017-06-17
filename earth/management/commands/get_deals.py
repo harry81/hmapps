@@ -14,7 +14,9 @@ def import_deals(url, origin):
         if len(deals_as_string) < 2048:
                 return
 
-        for item in deals['response']['body']['items']['item']:
+        cnt = 1
+        items = deals['response']['body']['items']['item']
+        for item in items:
             try:
                 item = rename_fields(item)
             except KeyError as e:
@@ -23,7 +25,7 @@ def import_deals(url, origin):
 
             item['origin'] = origin
             res = requests.post("%s/en/api/earth/deal/" % url, data=item)
-            print "{origin}-{bldg_nm} {area_cd} {bobn} {sum_amount} {dong}".format(**item), res
+            print "[%4d:%4d]" % (cnt, len(items)), "{origin}-{bldg_nm} {area_cd} {bobn} {sum_amount} {dong}".format(**item), res
 
 
 class Command(BaseCommand):
