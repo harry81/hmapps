@@ -14,6 +14,8 @@ from earth.utils import rename_fields, get_deal
 s3 = boto3.client('s3')
 bucket_name = 'hm-deals'
 
+EXCEED_LIMIT = "LIMITED NUMBER OF SERVICE REQUESTS EXCEEDS ERROR."
+
 
 def import_deals(url, origin):
     deals_as_string = open(origin, 'r').read()
@@ -40,7 +42,8 @@ def import_deals(url, origin):
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--url', nargs='+')
-        parser.add_argument('--when')
+        parser.add_argument('--year', type=int)
+        parser.add_argument('--month', type=int)
 
     def handle(self, *args, **options):
         addresses = {}
@@ -48,11 +51,12 @@ class Command(BaseCommand):
         with open('/tmp/address.json', 'rt') as fp:
             addresses = json.loads(fp.read())
 
-        year = '2016'
+        month = options.get('month', 1)
+        year = options.get('year', 2016)
         params = {}
 
-        for month in range(1, 13):
-            when = "%s%02d" % (year, month)
+        for month in range(month, 13):
+            when = "%d%02d" % (year, month)
 
             for si in addresses:
                 for gun in addresses[si]['guguns']:
@@ -64,11 +68,18 @@ class Command(BaseCommand):
                         size_obj = s3_obj['ContentLength']
                         print "Already there [%10s] - %d" % (path, size_obj)
 
+                        if size_obj < 250:
+                            content = s3_obj['Body']
+
+                            if EXCEED_LIMIT in content.read():
+                                print EXCEED_LIMIT
+                                return
+
                     except ClientError as ex:
                         full_path = get_deal(when, gugunCode=gun['CODE'], filename=filename)
                         if ex.response['Error']['Code'] == 'NoSuchKey':
                             s3.upload_file(full_path, bucket_name, path)
-                            print "Saved at S3 [%20s] - %d" % (path, os.stat(full_path).st_size)
+                            print "Saved at S3 [%10s] - %d" % (path, os.stat(full_path).st_size)
 
                         else:
                             raise ex
