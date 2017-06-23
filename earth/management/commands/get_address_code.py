@@ -4,6 +4,8 @@ import os
 import requests
 from django.core.management.base import BaseCommand
 from earth.models import Address, AddressCode
+from earth.utils import get_gugunlist, get_deal
+
 
 url_get_gugunlist = "http://rt.molit.go.kr/srh/getGugunListAjax.do"
 
@@ -28,73 +30,6 @@ SI = [
 ]
 
 
-# # 동 구하기
-# curl 'http://rt.molit.go.kr/srh/getGugunListAjax.do'  -H 'Origin: http://rt.molit.go.kr'   --data 'sidoCode=47'
-# 구미 - 47190
-def get_gugunlist(sido):
-    sidocode = sido['CODE']
-    response = requests.get("http://rt.molit.go.kr/srh/getGugunListAjax.do",
-                            params={"sidoCode": sidocode})
-    return response.json()['jsonList']
-
-
-# # 구군구하기
-# curl 'http://rt.molit.go.kr/srh/getDongListAjax.do'  -H 'Origin: http://rt.molit.go.kr'   --data 'gugunCode=47830'
-def get_donglist(dong):
-    guguncode = dong['CODE']
-    response = requests.get("http://rt.molit.go.kr/srh/getDongListAjax.do",
-                            params={"gugunCode": guguncode})
-    return response.json()['jsonList']
-
-
-# # 단지 구하기
-# curl 'http://rt.molit.go.kr/srh/getDanjiComboAjax.do' --data 'menuGubun=A&houseType=1&srhYear=2017&srhPeriod=2&gubunCode=LAND&dongCode=1121510900'
-def get_danjicombo(**addr):
-    params = {
-        "dongCode": None,
-        "menuGubun": "A",
-        "houseType": 1,
-        "srhYear": 2017,
-        "srhPeriod": 2,
-        "gubunCode": "LAND"
-    }
-    params.update(addr)
-
-    response = requests.get("http://rt.molit.go.kr/srh/getDanjiComboAjax.do",
-                            params=params)
-    return response.json()['jsonList']
-
-#  curl 'http://rt.molit.go.kr/srh/getListAjax.do'
-# -H 'Referer: http://rt.molit.go.kr/srh/srh.do?menuGubun=A&srhType=LOC&houseType=1&gubunCode=LAND'
-# --data 'reqPage=SRH&menuGubun=A&srhType=LOC&houseType=1&srhYear=2017&srhPeriod=2&gubunCode=LAND&sidoCode=47&gugunCode=47190&dongCode=4719012800&danjiCode=20106373&rentAmtType=3' 
-def get_list(**addr):
-    headers = {
-        "Referer": "http://rt.molit.go.kr/srh/srh.do?menuGubun=A&srhType=LOC&houseType=1&gubunCode=LAND"
-    }
-    
-    params={
-        "reqPage": "SRH",
-        "menuGubun": "A",
-        "srhType": "LOC",
-        "houseType": "1",
-        "srhYear": "2017",
-        "srhPeriod": "2",
-        "gubunCode": "LAND",
-        "sidoCode": "47",
-        "gugunCode": "47190",
-        "dongCode": "4719012800",
-        "danjiCode": "20106373",
-        "rentAmtType": "3",
-    }
-    
-    params.update(addr)
-    response = requests.get("http://rt.molit.go.kr/srh/getListAjax.do",
-                            headers=headers,
-                            params=params
-    )
-    return response.json()['jsonList']
-
-
 def process_deal(resp):
     for line in resp:
         for x in range(1, 4):
@@ -106,66 +41,21 @@ def process_deal(resp):
 
 # curl http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev\?LAWD_CD\=47190\&DEAL_YMD\=201701\&numOfRows\=1000\&serviceKey\=auRRfe7N35QzfgB8TuK41hLH%2Bsjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w%3D%3D | xmllint --format - > detail_47190_201701.xml
 
-def get_deal(year=2017, gugunCode=10117, name=None):
-    try:
-        os.mkdir('list/%s' % year)
-    except OSError:
-        pass
-        
-    filename = "%s.xml" % name
-    full_path = "list/%s/%s" % (year, filename)
-    if os.path.isfile(full_path):
-        if os.path.getsize(full_path) > 300:
-            print "Already exists %s" % filename
-            return
-
-    url_get_deals = "http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev"
-
-    params = {
-        "LAWD_CD": gugunCode,
-        "DEAL_YMD": year,
-        "numOfRows": 1000,
-        "serviceKey": "auRRfe7N35QzfgB8TuK41hLH+sjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w=="
-    }
-    response = requests.get(url_get_deals, params=params)
-    with open(full_path, 'wt') as fp:
-        fp.write(response.content)
-    
-    return filename
-
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--when'
-        )
-
     def handle(self, *args, **options):
-        if not options['when']:
-            return None
 
-        year = options['when']
+        address = {}
+
         addr = dict.fromkeys(['sidoCode', 'gugunCode', 'dongCode', 'danjiCode'])
-        SI = [
-            {"CODE": "11", "NAME": u"서울특별시"},
-            {"CODE": "47", "NAME": u"경상북도"},
-        ]
-
         for si in SI:
             addr['sidoCode'] = si['CODE']
             guns = get_gugunlist(si)
-            for gun in guns:
-                addr['gugunCode'] = gun['CODE']
-                if len(year) == 4:
-                    for x in range(1, 13):
-                        year_month = "%s%02d" % (year, x)
-                        name = "list_%s_%s_%s_%s" % (year_month, addr["gugunCode"], si['NAME'], gun['NAME'])
-                        res = get_deal(year=year_month, gugunCode=addr['gugunCode'], name=name)
-                        print res
 
-                else:
-                    year_month = "%s" % (year)
-                    name = "list_%s_%s_%s_%s" % (year_month, addr["gugunCode"], si['NAME'], gun['NAME'])
-                    res = get_deal(year=year_month, gugunCode=addr['gugunCode'], name=name)
-                    print res
+            address[int(si['CODE'])] = {
+                'guguns': guns,
+                'name': si['NAME']
+            }
 
+        with open('/tmp/address.json', 'wt') as fp:
+            fp.write(json.dumps(address, sort_keys=True))

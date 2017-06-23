@@ -14,7 +14,7 @@ def import_deals(url, origin):
         if len(deals_as_string) < 2048:
                 return
 
-        cnt = 1
+        cnt = 0
         items = deals['response']['body']['items']['item']
         for item in items:
             try:
@@ -25,7 +25,8 @@ def import_deals(url, origin):
 
             item['origin'] = origin
             res = requests.post("%s/en/api/earth/deal/" % url, data=item)
-            print "[%4d:%4d]" % (cnt, len(items)), "{origin}-{bldg_nm} {area_cd} {bobn} {sum_amount} {dong}".format(**item), res
+            cnt += 1
+            print "[%4d:%4d]" % (cnt, len(items)), "{bldg_nm} {area_cd} {bobn} {sum_amount} {dong}".format(**item), res
 
 
 class Command(BaseCommand):
@@ -46,6 +47,9 @@ class Command(BaseCommand):
 
         onlyfiles = [f for f in listdir(list_path) if isfile(join(list_path, f))]
 
+        cnt = 0
         for dest in onlyfiles:
+            cnt += 1
+            print "[%d:%d] %s" % (cnt, len(onlyfiles), dest)
             filename = "%s/%s" % (list_path, dest)
             import_deals(url, filename)
