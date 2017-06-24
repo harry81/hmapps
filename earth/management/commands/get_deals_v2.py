@@ -48,12 +48,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         addresses = {}
 
-        with open('/tmp/address.json', 'rt') as fp:
+        with open('address.json', 'rt') as fp:
             addresses = json.loads(fp.read())
 
         month = options.get('month', 1)
         year = options.get('year', 2016)
-        params = {}
 
         for month in range(month, 13):
             when = "%d%02d" % (year, month)
@@ -72,17 +71,20 @@ class Command(BaseCommand):
                             content = s3_obj['Body']
 
                             if EXCEED_LIMIT in content.read():
-                                print EXCEED_LIMIT
-                                return
+                                s3.delete_object(Bucket=bucket_name, Key=path)
+                                print "[%30s] %s is deleted." % (EXCEED_LIMIT, path)
 
                     except ClientError as ex:
                         full_path = get_deal(when, gugunCode=gun['CODE'], filename=filename)
+
+                        with open(full_path, 'rt') as fp:
+                            if EXCEED_LIMIT in fp.read():
+                                print "[%s] %s" % (EXCEED_LIMIT, path)
+                                return
+
                         if ex.response['Error']['Code'] == 'NoSuchKey':
                             s3.upload_file(full_path, bucket_name, path)
                             print "Saved at S3 [%10s] - %d" % (path, os.stat(full_path).st_size)
 
                         else:
                             raise ex
-
-        filename = '/tmp/address.json'
-        s3.upload_file(filename, bucket_name, 'address.json')
