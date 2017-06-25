@@ -15,8 +15,16 @@ def get_s3_keys(prefix=''):
     """
     bucket내에서 prefix에 해당하는 파일이름만 리스트로 돌려준다.
     """
-    list_of_keys = s3.list_objects(Bucket=bucket_name, Prefix=prefix)
-    return [ele['Key'] for ele in list_of_keys['Contents']]
+    keys = []
+
+    paginator = s3.get_paginator('list_objects')
+    page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+
+    for page in page_iterator:
+        for ele in page['Contents']:
+            keys.append(ele['Key'])
+
+    return keys
 
 
 def get_content_with_key(path='2016/04/47770_영덕군.xml'):
@@ -74,13 +82,20 @@ def create_deals(data_json, origin):
     except Exception as e:
         print "Exception %s at create_deals" % e
 
+    return origin
+
 
 def delete_deals(condition):
     Deal.objects.filter(**condition).delete()
 
 
-def update_deals(year=2016, month=01):
-    list_of_keys = get_s3_keys(u'2016/04')
+def update_deals(year=2016, month=None):
+    prefix = u'%d' % year
+
+    if month:
+        prefix = u"%s/%02d" % (prefix, month)
+
+    list_of_keys = get_s3_keys(prefix)
 
     for key_name in list_of_keys:
         content = get_content_with_key(key_name)
@@ -96,6 +111,11 @@ def update_deals(year=2016, month=01):
         condition = {"origin": key_name}
         delete_deals(condition)
         create_deals(data_json, origin=key_name)
+
+        for deal in Deal.objects.filter(origin=key_name):
+            print deal.update_location()
+
+    return list_of_keys
 
 
 def rename_fields(item):
