@@ -4,10 +4,14 @@ import locale
 import xmltodict
 import requests
 import boto3
+from django.conf import settings
+
 
 from .models import Deal
 
-s3 = boto3.client('s3')
+s3 = boto3.client('s3',
+                  aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                  aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
 bucket_name = 'hm-deals'
 
 
@@ -93,7 +97,7 @@ def update_deals(year='2016', month=None):
     prefix = u'%s' % year
 
     if month:
-        prefix = u"%s/%02s" % (prefix, month)
+        prefix = u"%s/%02d" % (prefix, int(month))
 
     list_of_keys = get_s3_keys(prefix)
 

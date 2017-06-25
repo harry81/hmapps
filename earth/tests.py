@@ -34,7 +34,7 @@ class DealsTeatCase(TestCase):
         list_of_keys = get_s3_keys(u'2016/04')
 
     def test_update_deals(self):
-        update_deals(year=2016, month=2)
+        update_deals(year=2016, month='2')
 
     def test_update_deals_without_month(self):
         update_deals(year=2016)
