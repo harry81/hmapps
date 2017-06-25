@@ -1,23 +1,112 @@
 # -*- coding: utf-8 -*-
 import os
 import locale
+import xmltodict
 import requests
+import boto3
+
+from .models import Deal
+
+s3 = boto3.client('s3')
+bucket_name = 'hm-deals'
 
 
-def flatten_dict(item):
-    addrdetail = item.pop('addrdetail', None)
+def get_s3_keys(prefix=''):
+    """
+    bucket내에서 prefix에 해당하는 파일이름만 리스트로 돌려준다.
+    """
+    list_of_keys = s3.list_objects(Bucket=bucket_name, Prefix=prefix)
+    return [ele['Key'] for ele in list_of_keys['Contents']]
 
-    if addrdetail:
-        for k, v in addrdetail.items():
-            item[k] = v
 
-    return item
+def get_content_with_key(path='2016/04/47770_영덕군.xml'):
+    """
+    해당 키에 해당하는 파일의 내용을 돌려준다.
+    """
+    s3_obj = s3.get_object(Bucket=bucket_name, Key=path)
+    body = s3_obj['Body']
+    content = body.read()
+    return content
+
+
+def convert_data_to_json(content):
+    """
+    input - content : xml 형식의 파일 내용
+    output - 필드명이 변경된 json 형식
+    """
+    deals = xmltodict.parse(content)
+    renamed_items = []
+
+    if int(deals['response']['body']['totalCount']) == 0:
+        return renamed_items
+
+    try:
+        items = deals['response']['body']['items']['item']
+    except TypeError as e:
+        print "Exception %s - %s" % (e, content)
+        return None
+
+    if not isinstance(items, list):
+        items = [items, ]
+
+    for item in items:
+        try:
+            renamed_items.append(rename_fields(item))
+        except KeyError as e:
+            print "%s %s" % (e, content)
+            continue
+
+    return renamed_items
+
+
+def create_deals(data_json, origin):
+    deals = []
+
+    for ele in data_json:
+        ele['origin'] = origin
+        # Deal.objects.create(**ele)
+        # print "{bldg_nm} 생성됨".format(**ele)
+        deals.append(Deal(**ele))
+
+    try:
+        Deal.objects.bulk_create(deals)
+        print "%s %d created" % (origin, len(deals))
+    except Exception as e:
+        print "Exception %s at create_deals" % e
+
+
+def delete_deals(condition):
+    Deal.objects.filter(**condition).delete()
+
+
+def update_deals(year=2016, month=01):
+    list_of_keys = get_s3_keys(u'2016/04')
+
+    for key_name in list_of_keys:
+        content = get_content_with_key(key_name)
+        try:
+            data_json = convert_data_to_json(content)
+        except Exception as e:
+            print "Exception %s at update_deals %s" % (e, key_name)
+            continue
+
+        if not data_json:
+            continue
+
+        condition = {"origin": key_name}
+        delete_deals(condition)
+        create_deals(data_json, origin=key_name)
 
 
 def rename_fields(item):
     ret = {}
 
-    ret['sum_amount'] = locale.atoi(item[u'거래금액'].replace(',', ''))
+    try:
+        ret['sum_amount'] = locale.atoi(item[u'거래금액'].replace(',', ''))
+    except Exception as e:
+        import ipdb; ipdb.set_trace()
+        print "Exception %s at sum_amount of rename_fields" % e
+
     ret['bldg_yy'] = item[u'건축년도'].encode('utf-8')
     ret['bldg_nm'] = item[u'아파트'].encode('utf-8')
     ret['dong'] = item[u'법정동'].encode('utf-8')
@@ -25,7 +114,10 @@ def rename_fields(item):
     ret['deal_mm'] = item[u'월'].encode('utf-8')
     ret['deal_dd'] = item[u'일'].encode('utf-8')
     ret['bldg_area'] = item[u'전용면적'].encode('utf-8')
-    ret['bobn'] = item[u'지번'].encode('utf-8')
+
+    if u'지번' in item:
+        ret['bobn'] = item[u'지번'].encode('utf-8')
+
     ret['area_cd'] = item[u'지역코드'].encode('utf-8')
     ret['aptfno'] = item[u'층'].encode('utf-8')
 

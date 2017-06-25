@@ -4,7 +4,6 @@ import requests
 from django.db import IntegrityError
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
-from .utils import flatten_dict
 
 
 client_id = "mAGsI5imdDqwwg8LwhJH"
@@ -45,7 +44,7 @@ class Deal(models.Model):
     sum_amount = models.IntegerField(u'거래금액')
     bldg_yy = models.CharField(u'건축년도', max_length=32)
     dong = models.CharField(u'법정동', max_length=32)
-    bldg_nm = models.CharField(u'아파트', max_length=32)
+    bldg_nm = models.CharField(u'아파트', max_length=256)
     deal_yy = models.CharField(u'년', max_length=32)
     deal_mm = models.CharField(u'월', max_length=32)
     deal_dd = models.CharField(u'일', max_length=32)
@@ -62,7 +61,17 @@ class Deal(models.Model):
     def __unicode__(self):
         return "%s %s" % (self.bldg_nm, self.bldg_area)
 
+    def _flatten_dict(self, item):
+        addrdetail = item.pop('addrdetail', None)
+
+        if addrdetail:
+            for k, v in addrdetail.items():
+                item[k] = v
+
+        return item
+
     def save(self, *args, **kwargs):
+
         url = "https://openapi.naver.com/v1/map/geocode?query=%s %s" % (self.dong, self.bobn)
 
         headers = {
@@ -73,7 +82,7 @@ class Deal(models.Model):
         response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
-            item = flatten_dict(response.json()['result']['items'][0])
+            item = self._flatten_dict(response.json()['result']['items'][0])
             point_dict = item.pop('point', None)
             point = Point(**point_dict)
 

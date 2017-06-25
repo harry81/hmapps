@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from django.test import TestCase
-from earth.models import Deal
+from .utils import (get_content_with_key,
+                    get_s3_keys,
+                    convert_data_to_json,
+                    update_deals,
+                    create_deals, delete_deals)
 
 
 class ArticlesTestCase(TestCase):
@@ -8,6 +14,21 @@ class ArticlesTestCase(TestCase):
     def setUp(self):
         pass
 
-    def test_start(self):
-        deal = Deal.objects.first()
-        deal.get_lnglat()
+
+class DealsTeatCase(TestCase):
+
+    def test_bulk_create(self):
+        path = u'2016/04/47190_구미시.xml'
+
+        content = get_content_with_key()
+        data_json = convert_data_to_json(content)
+        condition = {"origin": path}
+        delete_deals(condition)
+        create_deals(data_json, origin=path)
+
+    def test_get_s3_keys(self):
+        list_of_keys = get_s3_keys(u'2016/04')
+
+    def test_update_deals(self):
+        update_deals(year=2016, month=5)
+        import ipdb; ipdb.set_trace()
