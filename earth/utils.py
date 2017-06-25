@@ -4,6 +4,7 @@ import locale
 import xmltodict
 import requests
 import boto3
+from botocore.client import Config
 from django.conf import settings
 
 
@@ -11,7 +12,9 @@ from .models import Deal
 
 s3 = boto3.client('s3',
                   aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                  aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+                  aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                  config=Config(signature_version='s3v4'))
+
 bucket_name = 'hm-deals'
 
 
