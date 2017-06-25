@@ -89,11 +89,11 @@ def delete_deals(condition):
     Deal.objects.filter(**condition).delete()
 
 
-def update_deals(year=2016, month=None):
-    prefix = u'%d' % year
+def update_deals(year='2016', month=None):
+    prefix = u'%s' % year
 
     if month:
-        prefix = u"%s/%02d" % (prefix, month)
+        prefix = u"%s/%02s" % (prefix, month)
 
     list_of_keys = get_s3_keys(prefix)
 

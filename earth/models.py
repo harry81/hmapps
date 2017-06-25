@@ -125,4 +125,4 @@ class Deal(models.Model):
             except IntegrityError as e:
                 import ipdb; ipdb.set_trace()
 
-        return 'updated'
+        return '%s updated' % self
