@@ -99,7 +99,14 @@ class Deal(models.Model):
 
     def update_location(self):
         if self.location:
-            return 'ok'
+            return 'Location is already there %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
+
+        loc = Location.objects.filter(dongmyun=self.dong, rest=self.bobn)
+        if loc.exists():
+            self.location = loc[0]
+            self.save()
+
+            return 'Location updated with the existing one %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
 
         url = "https://openapi.naver.com/v1/map/geocode?query=%s %s" % (self.dong, self.bobn)
 
@@ -125,4 +132,4 @@ class Deal(models.Model):
             except IntegrityError as e:
                 import ipdb; ipdb.set_trace()
 
-        return '%s %s updated' % (self.bldg_nm, self.location)
+        return 'Location updated with new one %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
