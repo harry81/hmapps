@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
+import time
 from django.db import IntegrityError
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
@@ -116,6 +117,9 @@ class Deal(models.Model):
         }
 
         response = requests.get(url, headers=headers)
+        print "caused one request to openapi.naver.com %s %s" % (
+            self.bldg_nm.encode('utf8'), self.bobn.encode('utf8'))
+        time.sleep(1)
 
         if response.status_code == 200:
             item = self._flatten_dict(response.json()['result']['items'][0])
@@ -132,4 +136,4 @@ class Deal(models.Model):
             except IntegrityError as e:
                 import ipdb; ipdb.set_trace()
 
-        return 'Location updated with new one %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
+        return 'Location updated with new one %s[%d] %s' % (self.bldg_nm, self.pk, self.pk)
