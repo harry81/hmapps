@@ -21,7 +21,7 @@ class DealsTeatCase(TestCase):
     def test_bulk_create(self):
         path = u'2016/04/47190_구미시.xml'
 
-        content = get_content_with_key()
+        content = get_content_with_key(path=path)
         data_json = convert_data_to_json(content)
         condition = {"origin": path}
         delete_deals(condition)
@@ -44,5 +44,3 @@ class DealsTeatCase(TestCase):
         item = _address_to_geolocation(**params)
         for k, v in item.items():
             print k, v
-
-        import ipdb; ipdb.set_trace()

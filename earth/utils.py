@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 import locale
 import xmltodict
 import requests
@@ -75,12 +76,13 @@ def convert_data_to_json(content):
 
 
 def create_deals(data_json, origin):
+    print "Create deals on %s" % origin
+
     deals = []
 
     for ele in data_json:
         ele['origin'] = origin
-        # Deal.objects.create(**ele)
-        # print "{bldg_nm} 생성됨".format(**ele)
+        ele['area_nm'] = re.sub(r"[\x00-\x7f]+", "", origin).encode('utf8')
         deals.append(Deal(**ele))
 
     try:

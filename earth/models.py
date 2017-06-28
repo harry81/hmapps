@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import requests
-import time
 from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
-
-
-client_id = "mAGsI5imdDqwwg8LwhJH"
-client_secret = "58rX8bWARl"
 
 
 def _address_to_geolocation(**kwargs):
@@ -24,9 +19,16 @@ def _address_to_geolocation(**kwargs):
     try:
         response = requests.get(url_add2coord, params=params)
     except Exception as e:
+        import ipdb; ipdb.set_trace()
         print e
 
-    return response.json()['channel']['item'][0]
+    try:
+        item = response.json()['channel']['item'][0]
+    except IndexError as e:
+        print "%s %s" % (e, response.json())
+        return None
+
+    return item
 
 
 def _amend_location(response):
@@ -97,6 +99,7 @@ class Deal(models.Model):
     bldg_area = models.CharField(u'전용면적', max_length=32)
     bobn = models.CharField(u'지번', max_length=32)
     area_cd = models.CharField(u'지역코드', max_length=32)
+    area_nm = models.CharField(u'지역이름', max_length=32, default='')
     aptfno = models.CharField(u'층', max_length=32)
     origin = models.CharField(u'추출경로', max_length=256, null=True, blank=True)
     location = models.ForeignKey(Location, related_name="deals", null=True, blank=True)
@@ -124,8 +127,7 @@ class Deal(models.Model):
         if self.location:
             return 'Location is already there %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
 
-        print 'title contain %s %s' % (self.dong, self.bobn)
-        loc = Location.objects.filter(title__contains="%s %s" % (self.dong, self.bobn))
+        loc = Location.objects.filter(title__contains="%s %s %s" % (self.area_nm, self.dong, self.bobn))
 
         if loc.exists():
             self.location = loc[0]
@@ -133,11 +135,16 @@ class Deal(models.Model):
 
             return 'Location updated with the existing one %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
 
-        params = {'q': "%s %s" % (self.dong, self.bobn)}
+        params = {'q': "%s %s %s" % (self.area_nm, self.dong, self.bobn)}
         response = _address_to_geolocation(**params)
 
         if response:
-            item = _amend_location(response)
+            try:
+                item = _amend_location(response)
+            except IndexError as e:
+                print e
+                import ipdb; ipdb.set_trace()
+
             point = item.pop('point', None)
 
             try:
@@ -150,4 +157,4 @@ class Deal(models.Model):
             except IntegrityError as e:
                 import ipdb; ipdb.set_trace()
 
-        return 'Location updated with new one %s[%d] %s' % (self.bldg_nm, self.pk, self.pk)
+        return 'Location updated with new one %s[%d]' % (self.bldg_nm, self.pk)
