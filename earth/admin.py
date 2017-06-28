@@ -31,7 +31,7 @@ class DealInline(admin.TabularInline):
 
 class LocationAdmin(admin.ModelAdmin):
 
-    list_display = ("name", "sido", "sigugun", "dongmyun", "rest", "num_of_deals")
+    list_display = ("title", "buildingAddress", "localName_1")
     inlines = [DealInline]
 
 

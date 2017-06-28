@@ -3,12 +3,48 @@
 import requests
 import time
 from django.db import IntegrityError
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 
 
 client_id = "mAGsI5imdDqwwg8LwhJH"
 client_secret = "58rX8bWARl"
+
+
+def _address_to_geolocation(**kwargs):
+    url_add2coord = "https://apis.daum.net/local/v1/geo/addr2coord"
+
+    params = {}
+    params['apikey'] = settings.DAUM_API_KEY
+    params['output'] = 'json'
+
+    params.update(kwargs)
+
+    try:
+        response = requests.get(url_add2coord, params=params)
+    except Exception as e:
+        print e
+
+    return response.json()['channel']['item'][0]
+
+
+def _amend_location(response):
+    location = response.copy()
+    unused_fields = ['point_wx', 'point_wy', 'point_x', 'point_y']
+
+    for field in unused_fields:
+        location.pop(field, None)
+
+    lat = location.pop('lat', None)
+    lng = location.pop('lng', None)
+
+    point = Point(lat, lng)
+    location['point'] = point
+
+    location['daum_geo_id'] = location.pop('id', None)
+
+    return location
 
 
 class Address(models.Model):
@@ -24,18 +60,27 @@ class AddressCode(models.Model):
 
 
 class Location(models.Model):
-    name = models.CharField(max_length=64, null=True, blank=True)
+    bldg_nm = models.CharField(max_length=256, null=True, blank=True)
+    title = models.CharField(max_length=256, null=True, blank=True)
+    mountain = models.CharField(max_length=32, null=True, blank=True)
+    mainAddress = models.CharField(max_length=32, null=True, blank=True)
     point = models.PointField(default='POINT (0 0)', srid=4326)
-    isRoadAddress = models.CharField(max_length=32, null=True, blank=True)
-    country = models.CharField(max_length=32, null=True, blank=True)
-    sigugun = models.CharField(max_length=32, null=True, blank=True)
-    dongmyun = models.CharField(max_length=32, null=True, blank=True)
-    rest = models.CharField(max_length=32, null=True, blank=True)
-    sido = models.CharField(max_length=32, null=True, blank=True)
-    address = models.CharField(max_length=256, null=True, blank=True)
+    localName_1 = models.CharField(max_length=32, null=True, blank=True)
+    localName_2 = models.CharField(max_length=32, null=True, blank=True)
+    localName_3 = models.CharField(max_length=32, null=True, blank=True)
+
+    isNewAddress = models.CharField(max_length=2, null=True, blank=True)
+    buildingAddress = models.CharField(max_length=64, null=True, blank=True)
+    placeName = models.CharField(max_length=32, null=True, blank=True)
+    zipcode = models.CharField(max_length=32, null=True, blank=True)
+    newAddress = models.CharField(max_length=128, null=True, blank=True)
+    zone_no = models.CharField(max_length=32, null=True, blank=True)
+    subAddress = models.CharField(max_length=32, null=True, blank=True)
+
+    daum_geo_id = models.CharField(max_length=32, null=True, blank=True)
 
     def __unicode__(self):
-        return "%s %s %s" % (self.dongmyun, self.sido, self.rest)
+        return "%s" % (self.title)
 
     def num_of_deals(self):
         return self.deals.count()
@@ -72,29 +117,6 @@ class Deal(models.Model):
         return item
 
     def save(self, *args, **kwargs):
-        url = "https://openapi.naver.com/v1/map/geocode?query=%s %s" % (self.dong, self.bobn)
-
-        headers = {
-            "X-Naver-Client-Id": client_id,
-            "X-Naver-Client-Secret": client_secret
-        }
-
-        response = requests.get(url, headers=headers)
-
-        if response.status_code == 200:
-            item = self._flatten_dict(response.json()['result']['items'][0])
-            point_dict = item.pop('point', None)
-            point = Point(**point_dict)
-
-            try:
-                location, created = Location.objects.get_or_create(
-                    point=point, name=self.bldg_nm, defaults={"point": point}, **item)
-
-                self.location = location
-
-            except IntegrityError as e:
-                import ipdb; ipdb.set_trace()
-
         response = super(Deal, self).save(*args, **kwargs)
         return response
 
@@ -102,33 +124,25 @@ class Deal(models.Model):
         if self.location:
             return 'Location is already there %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
 
-        loc = Location.objects.filter(dongmyun=self.dong, rest=self.bobn)
+        print 'title contain %s %s' % (self.dong, self.bobn)
+        loc = Location.objects.filter(title__contains="%s %s" % (self.dong, self.bobn))
+
         if loc.exists():
             self.location = loc[0]
             self.save()
 
             return 'Location updated with the existing one %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
 
-        url = "https://openapi.naver.com/v1/map/geocode?query=%s %s" % (self.dong, self.bobn)
+        params = {'q': "%s %s" % (self.dong, self.bobn)}
+        response = _address_to_geolocation(**params)
 
-        headers = {
-            "X-Naver-Client-Id": client_id,
-            "X-Naver-Client-Secret": client_secret
-        }
-
-        response = requests.get(url, headers=headers)
-        print "caused one request to openapi.naver.com %s %s" % (
-            self.bldg_nm.encode('utf8'), self.bobn.encode('utf8'))
-        time.sleep(1)
-
-        if response.status_code == 200:
-            item = self._flatten_dict(response.json()['result']['items'][0])
-            point_dict = item.pop('point', None)
-            point = Point(**point_dict)
+        if response:
+            item = _amend_location(response)
+            point = item.pop('point', None)
 
             try:
                 location, created = Location.objects.get_or_create(
-                    point=point, name=self.bldg_nm, defaults={"point": point}, **item)
+                    point=point, bldg_nm=self.bldg_nm, defaults={"point": point}, **item)
 
                 self.location = location
                 self.save()

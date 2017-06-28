@@ -6,7 +6,7 @@ from .utils import (get_content_with_key,
                     convert_data_to_json,
                     update_deals,
                     create_deals, delete_deals)
-from earth.models import Deal
+from earth.models import Deal, _address_to_geolocation
 
 
 class ArticlesTestCase(TestCase):
@@ -38,3 +38,11 @@ class DealsTeatCase(TestCase):
 
     def test_update_deals_without_month(self):
         update_deals(year=2016)
+
+    def test_address_to_geolocation(self):
+        params = {'q': '대화동 2212'}
+        item = _address_to_geolocation(**params)
+        for k, v in item.items():
+            print k, v
+
+        import ipdb; ipdb.set_trace()
