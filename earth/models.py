@@ -41,7 +41,7 @@ def _amend_location(response):
     lat = location.pop('lat', None)
     lng = location.pop('lng', None)
 
-    point = Point(lat, lng)
+    point = Point(lng, lat)
     location['point'] = point
 
     location['daum_geo_id'] = location.pop('id', None)
@@ -75,7 +75,7 @@ class Location(models.Model):
     buildingAddress = models.CharField(max_length=64, null=True, blank=True)
     placeName = models.CharField(max_length=32, null=True, blank=True)
     zipcode = models.CharField(max_length=32, null=True, blank=True)
-    newAddress = models.CharField(max_length=128, null=True, blank=True)
+    newAddress = models.CharField(max_length=256, null=True, blank=True)
     zone_no = models.CharField(max_length=32, null=True, blank=True)
     subAddress = models.CharField(max_length=32, null=True, blank=True)
 
