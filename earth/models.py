@@ -5,6 +5,7 @@ from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
+from model_utils.models import TimeStampedModel
 
 
 def _address_to_geolocation(**kwargs):
@@ -49,19 +50,19 @@ def _amend_location(response):
     return location
 
 
-class Address(models.Model):
+class Address(TimeStampedModel):
     sido_code = models.CharField(max_length=32)
     gugun_code = models.CharField(max_length=32)
     dong_code = models.CharField(max_length=32, unique=True)
 
 
-class AddressCode(models.Model):
+class AddressCode(TimeStampedModel):
     code = models.CharField(max_length=32, unique=True)
     name = models.CharField(max_length=32, unique=True)
     gubun = models.CharField(max_length=32)
 
 
-class Location(models.Model):
+class Location(TimeStampedModel):
     bldg_nm = models.CharField(max_length=256, null=True, blank=True)
     title = models.CharField(max_length=256, null=True, blank=True)
     mountain = models.CharField(max_length=32, null=True, blank=True)
@@ -88,7 +89,7 @@ class Location(models.Model):
         return self.deals.count()
 
 
-class Deal(models.Model):
+class Deal(TimeStampedModel):
     sum_amount = models.IntegerField(u'거래금액')
     bldg_yy = models.CharField(u'건축년도', max_length=32)
     dong = models.CharField(u'법정동', max_length=32)
