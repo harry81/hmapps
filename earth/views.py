@@ -22,7 +22,7 @@ class DealViewSet(mixins.CreateModelMixin,
 
     @list_route(methods=['post'])
     def load_deals(self, request):
-        celery_load_deals.apply_async(countdown=1, **request.data)
+        celery_load_deals.apply_async(countdown=1, kwargs=request.data)
         return Response('ok')
 
 

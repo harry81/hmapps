@@ -99,11 +99,20 @@ def delete_deals(condition):
 
 
 def update_deals(year='2016', month=None):
-    prefix = u'%s' % year
+
+    if year:
+        _year = year[0]
 
     if month:
-        prefix = u"%s/%02d" % (prefix, int(month))
+        _month = month[0]
 
+    prefix = u'%s' % _year
+
+    if not month:
+        print "Month shouldn't be None"
+        return
+
+    prefix = u"%s/%02d" % (prefix, int(_month))
     list_of_keys = get_s3_keys(prefix)
 
     for key_name in list_of_keys:
@@ -122,7 +131,12 @@ def update_deals(year='2016', month=None):
         create_deals(data_json, origin=key_name)
 
         for deal in Deal.objects.filter(origin=key_name):
-            print deal.update_location()
+            try:
+                print deal.update_location()
+
+            except KeyError as e:
+                print "%s" % e
+                return
 
     return list_of_keys
 
