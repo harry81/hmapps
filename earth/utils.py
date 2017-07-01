@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import time
 import locale
 import xmltodict
 import requests
@@ -76,8 +77,6 @@ def convert_data_to_json(content):
 
 
 def create_deals(data_json, origin):
-    print "Create deals on %s" % origin
-
     deals = []
 
     for ele in data_json:
@@ -87,7 +86,7 @@ def create_deals(data_json, origin):
 
     try:
         Deal.objects.bulk_create(deals)
-        print "%s %d created" % (origin, len(deals))
+        print "+Created %s %d" % (origin, len(deals))
     except Exception as e:
         print "Exception %s at create_deals" % e
 
@@ -95,27 +94,33 @@ def create_deals(data_json, origin):
 
 
 def delete_deals(condition):
-    Deal.objects.filter(**condition).delete()
+    num = Deal.objects.filter(**condition).delete()
+    print '-Deleted %s %d' % (condition['origin'], num[0])
 
 
-def update_deals(year='2016', month=None):
+def update_deals(**kwargs):
 
-    if year:
-        _year = year[0]
+    year = kwargs.pop('year', None)
+    month = kwargs.pop('month', None)
 
-    if month:
-        _month = month[0]
-
-    prefix = u'%s' % _year
+    prefix = u'%s' % year
 
     if not month:
         print "Month shouldn't be None"
         return
 
-    prefix = u"%s/%02d" % (prefix, int(_month))
-    list_of_keys = get_s3_keys(prefix)
+    prefix = u"%s/%02d" % (prefix, int(month))
+    try:
+        list_of_keys = get_s3_keys(prefix)
+    except Exception as e:
+        print "%s %s" % (e, prefix)
+        return
 
+    cnt = 0
     for key_name in list_of_keys:
+        begin = time.time()
+        cnt += 1
+        print "\n[%3d/%3d]Processing %s " % (cnt, len(list_of_keys), key_name)
         content = get_content_with_key(key_name)
         try:
             data_json = convert_data_to_json(content)
@@ -130,13 +135,17 @@ def update_deals(year='2016', month=None):
         delete_deals(condition)
         create_deals(data_json, origin=key_name)
 
-        for deal in Deal.objects.filter(origin=key_name):
+        for deal in Deal.objects.filter(origin=key_name,
+                                        location__isnull=True):
             try:
-                print deal.update_location()
+                deal.update_location()
 
             except KeyError as e:
                 print "%s" % e
                 return
+
+        end = time.time()
+        print "Took %.1fs" % (end - begin)
 
     return list_of_keys
 

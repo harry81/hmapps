@@ -125,6 +125,12 @@ class Deal(TimeStampedModel):
         return response
 
     def update_location(self):
+        """
+        0 it has the location
+        1 updated with existing location
+        2 create new location and update with it
+
+        """
         if self.location:
             return 'Location is already there %s[%d] %s' % (self.bldg_nm, self.pk, self.location)
 

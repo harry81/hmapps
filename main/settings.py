@@ -1,4 +1,5 @@
 import os
+import sys
 import urllib
 import djcelery
 gettext = lambda s: s
@@ -352,3 +353,8 @@ try:
     from settings_local import *
 except:
     pass
+
+if sys.argv[1] == 'update_deals':
+    DATABASES['default'] = DATABASES['live']
+
+print "%s - [%s]" % ("DATABASES", DATABASES['default']['NAME'])
