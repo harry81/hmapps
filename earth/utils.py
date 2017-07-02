@@ -54,14 +54,16 @@ def convert_data_to_json(content):
     deals = xmltodict.parse(content)
     renamed_items = []
 
-    if int(deals['response']['body']['totalCount']) == 0:
-        return renamed_items
+    total_count = int(deals['response']['body']['totalCount'])
+
+    if total_count == 0:
+        return total_count, renamed_items
 
     try:
         items = deals['response']['body']['items']['item']
     except TypeError as e:
         print "Exception %s - %s" % (e, content)
-        return None
+        return total_count, renamed_items
 
     if not isinstance(items, list):
         items = [items, ]
@@ -73,7 +75,7 @@ def convert_data_to_json(content):
             print "%s %s" % (e, content)
             continue
 
-    return renamed_items
+    return total_count, renamed_items
 
 
 def create_deals(data_json, origin):
@@ -122,8 +124,9 @@ def update_deals(**kwargs):
         cnt += 1
         print "\n[%3d/%3d]Processing %s " % (cnt, len(list_of_keys), key_name)
         content = get_content_with_key(key_name)
+
         try:
-            data_json = convert_data_to_json(content)
+            total_count, data_json = convert_data_to_json(content)
         except Exception as e:
             print "Exception %s at update_deals %s" % (e, key_name)
             continue
@@ -132,7 +135,16 @@ def update_deals(**kwargs):
             continue
 
         condition = {"origin": key_name}
-        delete_deals(condition)
+        qs_origin = Deal.objects.filter(**condition)
+        num = qs_origin.count()
+
+        if num == total_count:
+            print "All items are already there, %s" % key_name
+            continue
+
+        num = qs_origin.delete()
+        print '-Deleted %s %d' % (condition['origin'], num[0])
+
         create_deals(data_json, origin=key_name)
 
         for deal in Deal.objects.filter(origin=key_name,
@@ -194,7 +206,7 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
     params = {
         "LAWD_CD": gugunCode,
         "DEAL_YMD": year,
-        "numOfRows": 1000,
+        "numOfRows": 5000,
         "serviceKey": "auRRfe7N35QzfgB8TuK41hLH+sjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w=="
     }
     response = requests.get(url_get_deals, params=params)

@@ -22,7 +22,7 @@ def import_deals(url, origin):
     deals = xmltodict.parse(deals_as_string)
 
     if len(deals_as_string) < 2048:
-                return
+        return
 
     cnt = 0
     items = deals['response']['body']['items']['item']
