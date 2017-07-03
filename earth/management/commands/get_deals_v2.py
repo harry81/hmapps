@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from os import listdir
-from os.path import isfile, join
 import json
 import xmltodict
 import requests
@@ -9,7 +7,13 @@ import boto3
 from botocore.exceptions import ClientError
 
 from django.core.management.base import BaseCommand
-from earth.utils import rename_fields, get_deal
+from earth.utils import rename_fields, get_deal, convert_data_to_json
+
+
+class NeedMoreItems(Exception):
+    """ Easy to understand naming conventions work best! """
+    pass
+
 
 s3 = boto3.client('s3')
 bucket_name = 'hm-deals'
@@ -65,6 +69,20 @@ class Command(BaseCommand):
                     try:
                         s3_obj = s3.get_object(Bucket=bucket_name, Key=path)
                         size_obj = s3_obj['ContentLength']
+
+                        body = s3_obj['Body']
+                        raw_body = xmltodict.parse(body.read())
+                        total_count = raw_body['response']['body']['totalCount']
+                        num_of_rows = raw_body['response']['body']['numOfRows']
+
+                        if num_of_rows > total_count:
+                            """ s3에 저장된 deal에 더 받아야할 데이타가 있다면, 파일을 삭제한 후 다시 s3 객체를 get한다.
+                            의도적으로 예외를 발생하여 해당 객체를 다시 다운로드할수 있게 한다.
+
+                            """
+                            s3.delete_object(Bucket=bucket_name, Key=path)
+                            s3.get_object(Bucket=bucket_name, Key=path)
+
                         print "Already there [%10s] - %d" % (path, size_obj)
 
                         if size_obj < 250:
@@ -75,14 +93,14 @@ class Command(BaseCommand):
                                 print "[%30s] %s is deleted." % (EXCEED_LIMIT, path)
 
                     except ClientError as ex:
-                        full_path = get_deal(when, gugunCode=gun['CODE'], filename=filename)
-
-                        with open(full_path, 'rt') as fp:
-                            if EXCEED_LIMIT in fp.read():
-                                print "[%s] %s" % (EXCEED_LIMIT, path)
-                                return
-
                         if ex.response['Error']['Code'] == 'NoSuchKey':
+                            full_path = get_deal(when, gugunCode=gun['CODE'], filename=filename)
+
+                            with open(full_path, 'rt') as fp:
+                                if EXCEED_LIMIT in fp.read():
+                                    print "[%s] %s" % (EXCEED_LIMIT, path)
+                                    return
+
                             s3.upload_file(full_path, bucket_name, path)
                             print "Saved at S3 [%10s] - %d" % (path, os.stat(full_path).st_size)
 
