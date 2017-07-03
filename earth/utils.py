@@ -95,11 +95,6 @@ def create_deals(data_json, origin):
     return origin
 
 
-def delete_deals(condition):
-    num = Deal.objects.filter(**condition).delete()
-    print '-Deleted %s %d' % (condition['origin'], num[0])
-
-
 def update_deals(**kwargs):
 
     year = kwargs.pop('year', None)
@@ -137,9 +132,11 @@ def update_deals(**kwargs):
         condition = {"origin": key_name}
         qs_origin = Deal.objects.filter(**condition)
         num = qs_origin.count()
+        total_count = len(data_json)
 
+        print "(%d-%d) " % (total_count, num),
         if num == total_count:
-            print "All items are already there, %s" % key_name
+            print "All items are already there, %s" % (key_name)
             continue
 
         num = qs_origin.delete()
