@@ -206,10 +206,15 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
     params = {
         "LAWD_CD": gugunCode,
         "DEAL_YMD": year,
-        "numOfRows": 5000,
+        "numOfRows": 10000,
         "serviceKey": "auRRfe7N35QzfgB8TuK41hLH+sjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w=="
     }
-    response = requests.get(url_get_deals, params=params)
+    try:
+        response = requests.get(url_get_deals, params=params)
+    except Exception as e:
+        print e
+        import ipdb; ipdb.set_trace()
+
     with open(full_path, 'wt') as fp:
         fp.write(response.content)
 
