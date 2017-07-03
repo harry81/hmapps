@@ -354,7 +354,10 @@ try:
 except:
     pass
 
-if sys.argv[1] == 'update_deals':
-    DATABASES['default'] = DATABASES['live']
+try:
+    if sys.argv[1] == 'update_deals':
+        DATABASES['default'] = DATABASES['live']
+except IndexError as e:
+    print e
 
 print "%s - [%s]" % ("DATABASES", DATABASES['default']['NAME'])
