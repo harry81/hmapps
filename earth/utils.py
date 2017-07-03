@@ -117,7 +117,7 @@ def update_deals(**kwargs):
     for key_name in list_of_keys:
         begin = time.time()
         cnt += 1
-        print "\n[%3d/%3d]Processing %s " % (cnt, len(list_of_keys), key_name)
+        print "\n[%3d/%3d]Processing %s " % (cnt, len(list_of_keys), key_name),
         content = get_content_with_key(key_name)
 
         try:
@@ -134,7 +134,7 @@ def update_deals(**kwargs):
         num = qs_origin.count()
         total_count = len(data_json)
 
-        print "(%d-%d) " % (total_count, num),
+        print "(%d-%d) \n" % (total_count, num),
         if num == total_count:
             print "All items are already there, %s" % (key_name)
             continue
