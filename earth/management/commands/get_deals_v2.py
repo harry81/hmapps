@@ -72,14 +72,15 @@ class Command(BaseCommand):
 
                         body = s3_obj['Body']
                         raw_body = xmltodict.parse(body.read())
-                        total_count = raw_body['response']['body']['totalCount']
-                        num_of_rows = raw_body['response']['body']['numOfRows']
+                        total_count = int(raw_body['response']['body']['totalCount'])
+                        num_of_rows = int(raw_body['response']['body']['numOfRows'])
 
-                        if num_of_rows > total_count:
+                        if num_of_rows <= total_count:
                             """ s3에 저장된 deal에 더 받아야할 데이타가 있다면, 파일을 삭제한 후 다시 s3 객체를 get한다.
                             의도적으로 예외를 발생하여 해당 객체를 다시 다운로드할수 있게 한다.
 
                             """
+                            print 'It has more deals to get [%d/%d]' % (num_of_rows, total_count)
                             s3.delete_object(Bucket=bucket_name, Key=path)
                             s3.get_object(Bucket=bucket_name, Key=path)
 
