@@ -26,7 +26,7 @@ def _address_to_geolocation(**kwargs):
     try:
         item = response.json()['channel']['item'][0]
     except (IndexError, KeyError) as e:
-        print "%s %s" % (e, response.json())
+        print "%s : %s  %s" % (e, params['q'], response.json())
         return None
 
     return item

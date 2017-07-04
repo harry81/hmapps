@@ -21,6 +21,7 @@ class DealAdmin(admin.ModelAdmin):
     list_display = ("bldg_nm", "bldg_area", "sum_amount", "dong", "bobn", "deal_dd")
     list_filter = ("deal_yy", "deal_mm", "deal_dd")
     raw_id_fields = ("location",)
+    search_fields = ["bldg_nm", "dong"]
 
 
 admin.site.register(Deal, DealAdmin)
@@ -34,6 +35,7 @@ class LocationAdmin(admin.ModelAdmin):
 
     list_display = ("title", "buildingAddress", "localName_1")
     inlines = [DealInline]
+    search_fields = ["title", "bldg_nm"]
 
 
 admin.site.register(Location, LocationAdmin)
