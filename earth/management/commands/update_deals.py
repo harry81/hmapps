@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 from django.core.management.base import BaseCommand
 from earth.utils import update_deals
 

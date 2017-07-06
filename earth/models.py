@@ -4,6 +4,7 @@ import requests
 from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.core.exceptions import MultipleObjectsReturned
 from django.contrib.gis.geos import Point
 from model_utils.models import TimeStampedModel
 
@@ -161,7 +162,7 @@ class Deal(TimeStampedModel):
                 self.location = location
                 self.save()
 
-            except IntegrityError as e:
+            except (IntegrityError, MultipleObjectsReturned) as e:
                 import ipdb; ipdb.set_trace()
 
         return 'Location updated with new one %s[%d]' % (self.bldg_nm, self.pk)

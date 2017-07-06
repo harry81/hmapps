@@ -192,12 +192,6 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
         pass
 
     full_path = "list/%s/%s" % (year, filename)
-
-    if os.path.isfile(full_path):
-        if os.path.getsize(full_path) > 300:
-            print "Already exists %s" % filename
-            return full_path
-
     url_get_deals = "http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev"
 
     params = {
