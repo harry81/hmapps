@@ -149,9 +149,10 @@ def update_deals(**kwargs):
             try:
                 deal.update_location()
 
-            except KeyError as e:
-                print "%s" % e
-                return
+            except (Exception, KeyError) as e:
+                if 'RequestThrottled' in e.message.keys():
+                    print e.message
+                    return
 
         end = time.time()
         print "Took %.1fs" % (end - begin)
