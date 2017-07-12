@@ -23,13 +23,13 @@ def _address_to_geolocation(**kwargs):
 
     while(cnt > 0):
         try:
-            cnt -= 1
             response = requests.get(url_add2coord, params=params)
         except Exception as e:
             if cnt < 0:
                 print e
                 import ipdb; ipdb.set_trace()
             else:
+                cnt -= 1
                 print "wait and again %d" % cnt
                 time.sleep(3 - cnt)
                 continue

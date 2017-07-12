@@ -113,4 +113,5 @@ class Command(BaseCommand):
                             print "Saved at S3 [%10s] - %d" % (path, os.stat(full_path).st_size)
 
                         else:
+                            print ex
                             raise ex
