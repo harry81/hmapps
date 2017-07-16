@@ -151,9 +151,9 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     'djangocms_column',
     'djangocms_link',
+    'cmsplugin_filer_image',
     'cmsplugin_filer_file',
     'cmsplugin_filer_folder',
-    'cmsplugin_filer_image',
     'cmsplugin_filer_utils',
     'djangocms_style',
     'djangocms_snippet',
@@ -360,4 +360,4 @@ try:
 except IndexError as e:
     print e
 
-print "%s - [%s]" % ("DATABASES", DATABASES['default']['NAME'])
+print "%s - [%s]" % ("DATABASES", DATABASES['default']['HOST'])

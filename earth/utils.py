@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import sys
 import time
 import locale
 import xmltodict
@@ -8,9 +9,17 @@ import requests
 import boto3
 from botocore.client import Config
 from django.conf import settings
-
+from django.core.cache import cache
 
 from .models import Deal
+
+sys.stdout.flush()
+EXCEED_LIMIT = "LIMITED NUMBER OF SERVICE REQUESTS EXCEEDS ERROR."
+NOT_REGISTERED = "SERVICE KEY IS NOT REGISTERED ERROR."
+DATA_KEYS = [x for x in dir(settings) if 'DATA_GO_KR' in x]
+data_go_kr_key = 'DATA_GO_KR_KEY1'
+cache.set('DATA_KEY', data_go_kr_key)
+
 
 s3 = boto3.client('s3',
                   aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -144,8 +153,10 @@ def update_deals(**kwargs):
 
         create_deals(data_json, origin=key_name)
 
-        for deal in Deal.objects.filter(origin=key_name,
-                                        location__isnull=True):
+        deals = Deal.objects.filter(origin=key_name,
+                                    location__isnull=True)
+
+        for deal in deals:
             try:
                 deal.update_location()
 
@@ -186,7 +197,15 @@ def rename_fields(item):
     return ret
 
 
+def _get_data_go_kr_key():
+    data_key = cache.get('DATA_KEY')
+    data_key = re.sub('\d(?!\d)', lambda x: str(int(x.group(0)) + 1), data_key)
+    cache.set('DATA_KEY', data_key)
+
+
 def get_deal(year=2017, gugunCode=10117, filename=None):
+    global data_go_kr_key
+
     try:
         os.mkdir('list/%s' % year)
     except OSError:
@@ -199,17 +218,36 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
         "LAWD_CD": gugunCode,
         "DEAL_YMD": year,
         "numOfRows": 10000,
-        "serviceKey": "auRRfe7N35QzfgB8TuK41hLH+sjwp8Vp7Q4ot8VaoRsnA0qsPHX65GonUcnkKfRzkBPdYz2h7llYNLRo19RJ2w=="
+        "serviceKey": getattr(settings, data_go_kr_key)
     }
 
     cnt = 3
 
     while(cnt > 0):
+        cnt -= 1
         try:
-            cnt -= 1
-            response = requests.get(url_get_deals, params=params)
+            response = requests.get(url_get_deals, params=params, timeout=5)
+
+            if EXCEED_LIMIT in response.content:
+                _get_data_go_kr_key()
+                data_go_kr_key = cache.get('DATA_KEY')
+                params['serviceKey'] = getattr(settings, data_go_kr_key)
+
+                print "Switch data key %s" % data_go_kr_key
+                raise Exception("Switch Key")
+
+            if NOT_REGISTERED in response.content:
+                raise Exception(NOT_REGISTERED)
+
+            break
+
         except Exception as e:
-            print e
+            print cnt, e
+
+            if 'Switch' in e.message:
+                cnt += 1
+                continue
+
             if cnt < 0:
                 import ipdb; ipdb.set_trace()
 

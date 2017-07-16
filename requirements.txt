@@ -28,7 +28,6 @@ django-celery==3.1.17
 django-classy-tags==0.8.0
 django-cms==3.4.2
 django-cors-headers==2.1.0
-django-extensions==1.7.4
 django-filer==1.2.7
 django-filter==1.0.4
 django-filters==0.2.1

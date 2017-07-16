@@ -7,7 +7,8 @@ import boto3
 from botocore.exceptions import ClientError
 
 from django.core.management.base import BaseCommand
-from earth.utils import rename_fields, get_deal, convert_data_to_json
+from earth.utils import (rename_fields, get_deal,
+                         convert_data_to_json, EXCEED_LIMIT)
 
 
 class NeedMoreItems(Exception):
@@ -17,8 +18,6 @@ class NeedMoreItems(Exception):
 
 s3 = boto3.client('s3')
 bucket_name = 'hm-deals'
-
-EXCEED_LIMIT = "LIMITED NUMBER OF SERVICE REQUESTS EXCEEDS ERROR."
 
 
 def import_deals(url, origin):
@@ -79,8 +78,17 @@ class Command(BaseCommand):
                             s3.delete_object(Bucket=bucket_name, Key=path)
                             s3.get_object(Bucket=bucket_name, Key=path)
 
-                        total_count = int(raw_body['response']['body']['totalCount'])
-                        num_of_rows = int(raw_body['response']['body']['numOfRows'])
+                        try:
+                            """
+                            to handle
+                            "SERVICE KEY IS NOT REGISTERED ERROR"
+                            """
+                            total_count = int(raw_body['response']['body']['totalCount'])
+                            num_of_rows = int(raw_body['response']['body']['numOfRows'])
+
+                        except KeyError:
+                            s3.delete_object(Bucket=bucket_name, Key=path)
+                            s3.get_object(Bucket=bucket_name, Key=path)
 
                         if num_of_rows <= total_count:
                             """ s3에 저장된 deal에 더 받아야할 데이타가 있다면, 파일을 삭제한 후 다시 s3 객체를 get한다.

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from django.test import TestCase
+from django.core.cache import cache
 from .utils import (get_content_with_key,
                     get_s3_keys,
                     convert_data_to_json,
                     update_deals,
-                    create_deals, delete_deals)
+                    create_deals,
+                    _get_data_go_kr_key)
 from earth.models import Deal, _address_to_geolocation
 
 
@@ -24,7 +26,6 @@ class DealsTeatCase(TestCase):
         content = get_content_with_key(path=path)
         data_json = convert_data_to_json(content)
         condition = {"origin": path}
-        delete_deals(condition)
         create_deals(data_json, origin=path)
 
         for deal in Deal.objects.filter(origin=path):
@@ -44,3 +45,12 @@ class DealsTeatCase(TestCase):
         item = _address_to_geolocation(**params)
         for k, v in item.items():
             print k, v
+
+    def test_get_data_go_kr_key(self):
+        data_key = cache.get('DATA_KEY')
+        self.assertEqual(data_key, "DATA_GO_KR_KEY1")
+
+        _get_data_go_kr_key()
+
+        data_key = cache.get('DATA_KEY')
+        self.assertEqual(data_key, "DATA_GO_KR_KEY2")
