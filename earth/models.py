@@ -29,17 +29,17 @@ def _address_to_geolocation(**kwargs):
 
         except Exception as e:
             if cnt < 0:
-                print e
+                print (e)
                 import ipdb; ipdb.set_trace()
             else:
-                print "wait and again %d" % cnt
+                print ("wait and again %d" % cnt)
                 time.sleep(3 - cnt)
                 continue
 
     try:
         item = response.json()['channel']['item'][0]
     except IndexError as e:
-        print "%s : %s" % (e, params['q'])
+        print ("%s : %s" % (e, params['q']))
         return None
 
     except KeyError as e:
@@ -165,7 +165,7 @@ class Deal(TimeStampedModel):
             try:
                 item = _amend_location(response)
             except IndexError as e:
-                print e
+                print (e)
                 import ipdb; ipdb.set_trace()
 
             point = item.pop('point', None)

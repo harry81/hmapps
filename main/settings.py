@@ -1,6 +1,6 @@
 import os
 import sys
-import urllib
+import urllib.parse
 import djcelery
 gettext = lambda s: s
 DATA_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -183,8 +183,8 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
 
 BROKER_URL = 'sqs://{0}:{1}@'.format(
-    urllib.quote(AWS_ACCESS_KEY_ID, safe=''),
-    urllib.quote(AWS_SECRET_ACCESS_KEY, safe='')
+    urllib.parse.quote(AWS_ACCESS_KEY_ID, safe=''),
+    urllib.parse.quote(AWS_SECRET_ACCESS_KEY, safe='')
 )
 
 BROKER_TRANSPORT_OPTIONS = {
@@ -350,7 +350,7 @@ import djcelery
 djcelery.setup_loader()
 
 try:
-    from settings_local import *
+    from main.settings_local import *
 except:
     pass
 
@@ -360,6 +360,6 @@ try:
     if sys.argv[1] in list_of_commands:
         DATABASES['default'] = DATABASES['live']
 except IndexError as e:
-    print e
+    print (e)
 
-print "%s - [%s]" % ("DATABASES", DATABASES['default']['HOST'])
+print ("%s - [%s]" % ("DATABASES", DATABASES['default']['HOST']))

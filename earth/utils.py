@@ -71,7 +71,7 @@ def convert_data_to_json(content):
     try:
         items = deals['response']['body']['items']['item']
     except TypeError as e:
-        print "Exception %s - %s" % (e, content)
+        print ("Exception %s - %s" % (e, content))
         return total_count, renamed_items
 
     if not isinstance(items, list):
@@ -81,7 +81,7 @@ def convert_data_to_json(content):
         try:
             renamed_items.append(rename_fields(item))
         except KeyError as e:
-            print "%s %s" % (e, content)
+            print ("%s %s" % (e, content))
             continue
 
     return total_count, renamed_items
@@ -97,9 +97,9 @@ def create_deals(data_json, origin):
 
     try:
         Deal.objects.bulk_create(deals)
-        print "+Created %s %d" % (origin, len(deals))
+        print ("+Created %s %d" % (origin, len(deals)))
     except Exception as e:
-        print "Exception %s at create_deals" % e
+        print ("Exception %s at create_deals" % e)
 
     return origin
 
@@ -112,27 +112,27 @@ def update_deals(**kwargs):
     prefix = u'%s' % year
 
     if not month:
-        print "Month shouldn't be None"
+        print ("Month shouldn't be None")
         return
 
     prefix = u"%s/%02d" % (prefix, int(month))
     try:
         list_of_keys = get_s3_keys(prefix)
     except Exception as e:
-        print "%s %s" % (e, prefix)
+        print ("%s %s" % (e, prefix))
         return
 
     cnt = 0
     for key_name in list_of_keys:
         begin = time.time()
         cnt += 1
-        print "\n[%3d/%3d]Processing %s " % (cnt, len(list_of_keys), key_name),
+        print ("\n[%3d/%3d]Processing %s " % (cnt, len(list_of_keys), key_name),)
         content = get_content_with_key(key_name)
 
         try:
             total_count, data_json = convert_data_to_json(content)
         except Exception as e:
-            print "Exception %s at update_deals %s" % (e, key_name)
+            print ("Exception %s at update_deals %s" % (e, key_name))
             continue
 
         if not data_json:
@@ -143,13 +143,13 @@ def update_deals(**kwargs):
         num = qs_origin.count()
         total_count = len(data_json)
 
-        print "(%d-%d) \n" % (total_count, num),
+        print ("(%d-%d) \n" % (total_count, num),)
         if num == total_count:
-            print "All items are already there, %s" % (key_name)
+            print ("All items are already there, %s" % (key_name))
             continue
 
         num = qs_origin.delete()
-        print '-Deleted %s %d' % (condition['origin'], num[0])
+        print ('-Deleted %s %d' % (condition['origin'], num[0]))
 
         create_deals(data_json, origin=key_name)
 
@@ -162,11 +162,11 @@ def update_deals(**kwargs):
 
             except (Exception, KeyError) as e:
                 if 'RequestThrottled' in e.message.keys():
-                    print e.message
+                    print (e.message)
                     return
 
         end = time.time()
-        print "Took %.1fs" % (end - begin)
+        print ("Took %.1fs" % (end - begin))
 
     return list_of_keys
 
@@ -178,7 +178,7 @@ def rename_fields(item):
         ret['sum_amount'] = locale.atoi(item[u'거래금액'].replace(',', ''))
     except Exception as e:
         import ipdb; ipdb.set_trace()
-        print "Exception %s at sum_amount of rename_fields" % e
+        print ("Exception %s at sum_amount of rename_fields" % e)
 
     ret['bldg_yy'] = item[u'건축년도'].encode('utf-8')
     ret['bldg_nm'] = item[u'아파트'].encode('utf-8')
@@ -233,7 +233,7 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
                 data_go_kr_key = cache.get('DATA_KEY')
                 params['serviceKey'] = getattr(settings, data_go_kr_key)
 
-                print "Switch data key %s" % data_go_kr_key
+                print ("Switch data key %s" % data_go_kr_key)
                 raise Exception("Switch Key")
 
             if NOT_REGISTERED in response.content:
@@ -242,7 +242,7 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
             break
 
         except Exception as e:
-            print cnt, e
+            print (cnt, e)
 
             if 'Switch' in e.message:
                 cnt += 1
