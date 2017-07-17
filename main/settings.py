@@ -350,7 +350,7 @@ import djcelery
 djcelery.setup_loader()
 
 try:
-    from settings_local import *
+    from main.settings_local import *
 except:
     pass
 
@@ -360,6 +360,6 @@ try:
     if sys.argv[1] in list_of_commands:
         DATABASES['default'] = DATABASES['live']
 except IndexError as e:
-    print e
+    print (e)
 
-print "%s - [%s]" % ("DATABASES", DATABASES['default']['HOST'])
+print ("%s - [%s]" % ("DATABASES", DATABASES['default']['HOST']))

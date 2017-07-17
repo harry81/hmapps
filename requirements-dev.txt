@@ -1,6 +1,5 @@
 -r requirements.txt
 
-django-extensions==1.7.4
 jupyter==1.0.0
 matplotlib==2.0.2
 plotly==2.0.12

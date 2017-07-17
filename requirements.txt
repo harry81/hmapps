@@ -39,6 +39,7 @@ django-polymorphic==1.0.2
 django-sekizai==0.10.0
 django-storages==1.5.1
 django-treebeard==4.1.0
+django-extensions==1.7.4
 djangocms-admin-style==1.2.6.2
 djangocms-attributes-field==0.2.0
 djangocms-column==1.7.0
