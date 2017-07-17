@@ -354,8 +354,10 @@ try:
 except:
     pass
 
+list_of_commands = ['get_deals_v2', 'update_deals']
+
 try:
-    if sys.argv[1] == 'update_deals':
+    if sys.argv[1] in list_of_commands:
         DATABASES['default'] = DATABASES['live']
 except IndexError as e:
     print e

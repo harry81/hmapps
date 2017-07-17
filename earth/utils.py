@@ -226,7 +226,7 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
     while(cnt > 0):
         cnt -= 1
         try:
-            response = requests.get(url_get_deals, params=params, timeout=5)
+            response = requests.get(url_get_deals, params=params, timeout=10)
 
             if EXCEED_LIMIT in response.content:
                 _get_data_go_kr_key()
