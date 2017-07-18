@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import requests
 from lxml import etree
-from StringIO import StringIO
-from urlparse import urlparse
+from io import BytesIO
+import urllib.parse
 from django.core.files.storage import default_storage
 from datetime import datetime
-from dateutil.parser import parse
+from dateutil.parser import parse as parse
 from django.core.mail import EmailMultiAlternatives
 from .models import Item
 
@@ -22,21 +22,21 @@ def _get_filename(item=None):
         category = 'hani'
         filename = '%s/%s-%s' % (category,
                                  published.strftime('%Y-%m-%d'),
-                                 urlparse(url).path.split('/')[-1])
+                                 urllib.parse(url).path.split('/')[-1])
 
     elif 'mk.co.kr' in url:
         category = 'mk'
         filename = '%s/%s-%s.html' % (
             category,
             published.strftime('%Y-%m-%d'),
-            urlparse(url).query.split('&')[0].split('=')[1])
+            urllib.parse(url).query.split('&')[0].split('=')[1])
 
     return filename, category
 
 
 def fetch_news_to_S3(url='http://www.hani.co.kr/rss/'):
     feeds = requests.get(url)
-    output = StringIO(feeds.content)
+    output = BytesIO(feeds.content)
 
     try:
         tree = etree.parse(output)
@@ -48,7 +48,7 @@ def fetch_news_to_S3(url='http://www.hani.co.kr/rss/'):
         url = item.xpath('link/text()')[0]
 
         if default_storage.exists(filename):
-            print 'Skiped because already done - %s' % filename
+            print ('Skiped because already done - %s' % filename)
             continue
 
         rep = requests.get(url)
@@ -101,9 +101,9 @@ def insert_news_to_db(articles):
     for article in articles:
         try:
             item, created = Item.objects.update_or_create(url=article['url'], defaults=article)
-            print item, created
+            print (item, created)
         except:
-            print "Problem in Inserting"
+            print ("Problem in Inserting")
 
 
 def _parse_hani(ele):
@@ -138,7 +138,7 @@ def _parse_hani(ele):
         article['imgs'] = root.xpath('//div[@class="image"]/img/@src')
 
     except IndexError as e:
-        print e
+        print (e)
 
     return article
 
@@ -167,11 +167,11 @@ def _parse_mk(ele):
         article['imgs'] = root.xpath('//div[@class="img_center"]/img/@src')
 
     except UnicodeEncodeError as e:
-        print e
+        print (e)
         return
 
     except IndexError as e:
-        print e
+        print (e)
         return
 
     return article
