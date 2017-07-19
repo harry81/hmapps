@@ -2,7 +2,7 @@
 import requests
 from lxml import etree
 from io import BytesIO
-import urllib.parse
+from urllib.parse import urlparse
 from django.core.files.storage import default_storage
 from datetime import datetime
 from dateutil.parser import parse as parse
@@ -22,14 +22,14 @@ def _get_filename(item=None):
         category = 'hani'
         filename = '%s/%s-%s' % (category,
                                  published.strftime('%Y-%m-%d'),
-                                 urllib.parse(url).path.split('/')[-1])
+                                 urlparse(url).path.split('/')[-1])
 
     elif 'mk.co.kr' in url:
         category = 'mk'
         filename = '%s/%s-%s.html' % (
             category,
             published.strftime('%Y-%m-%d'),
-            urllib.parse(url).query.split('&')[0].split('=')[1])
+            urlparse(url).query.split('&')[0].split('=')[1])
 
     return filename, category
 

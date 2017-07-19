@@ -228,7 +228,7 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
         try:
             response = requests.get(url_get_deals, params=params, timeout=10)
 
-            if EXCEED_LIMIT in response.content:
+            if EXCEED_LIMIT in response.text:
                 _get_data_go_kr_key()
                 data_go_kr_key = cache.get('DATA_KEY')
                 params['serviceKey'] = getattr(settings, data_go_kr_key)
@@ -236,7 +236,7 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
                 print ("Switch data key %s" % data_go_kr_key)
                 raise Exception("Switch Key")
 
-            if NOT_REGISTERED in response.content:
+            if NOT_REGISTERED in response.text:
                 raise Exception(NOT_REGISTERED)
 
             break
@@ -244,14 +244,14 @@ def get_deal(year=2017, gugunCode=10117, filename=None):
         except Exception as e:
             print (cnt, e)
 
-            if 'Switch' in e.message:
+            if 'Switch' in e.args[0]:
                 cnt += 1
                 continue
 
             if cnt < 0:
                 import ipdb; ipdb.set_trace()
 
-    with open(full_path, 'wt') as fp:
+    with open(full_path, 'wb') as fp:
         fp.write(response.content)
 
     return full_path

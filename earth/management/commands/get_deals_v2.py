@@ -4,9 +4,9 @@ import json
 import xmltodict
 import requests
 import boto3
-from botocore.exceptions import ClientError
-
+from django.conf import settings
 from django.core.management.base import BaseCommand
+from botocore.exceptions import ClientError
 from earth.utils import (rename_fields, get_deal,
                          convert_data_to_json, EXCEED_LIMIT)
 
@@ -15,8 +15,9 @@ class NeedMoreItems(Exception):
     """ Easy to understand naming conventions work best! """
     pass
 
-
-s3 = boto3.client('s3')
+s3 = boto3.client('s3',
+                  aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                  aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
 bucket_name = 'hm-deals'
 
 
@@ -33,13 +34,13 @@ def import_deals(url, origin):
         try:
             item = rename_fields(item)
         except KeyError as e:
-            print e
+            print (e)
             continue
 
         item['origin'] = origin
         res = requests.post("%s/en/api/earth/deal/" % url, data=item)
         cnt += 1
-        print "[%4d:%4d]" % (cnt, len(items)), "{bldg_nm} {area_cd} {bobn} {sum_amount} {dong}".format(**item), res
+        print ("[%4d:%4d]" % (cnt, len(items)), "{bldg_nm} {area_cd} {bobn} {sum_amount} {dong}".format(**item), res)
 
 
 class Command(BaseCommand):
@@ -74,7 +75,7 @@ class Command(BaseCommand):
                         try:
                             raw_body = xmltodict.parse(body.read())
                         except Exception as e:
-                            print e
+                            print (e)
                             s3.delete_object(Bucket=bucket_name, Key=path)
                             s3.get_object(Bucket=bucket_name, Key=path)
 
@@ -95,18 +96,18 @@ class Command(BaseCommand):
                             의도적으로 예외를 발생하여 해당 객체를 다시 다운로드할수 있게 한다.
 
                             """
-                            print 'It has more deals to get [%d/%d]' % (num_of_rows, total_count)
+                            print ('It has more deals to get [%d/%d]' % (num_of_rows, total_count))
                             s3.delete_object(Bucket=bucket_name, Key=path)
                             s3.get_object(Bucket=bucket_name, Key=path)
 
-                        print "Already there [%10s] - %d" % (path, size_obj)
+                        print ("Already there [%10s] - %d" % (path, size_obj))
 
                         if size_obj < 250:
                             content = s3_obj['Body']
 
                             if EXCEED_LIMIT in content.read():
                                 s3.delete_object(Bucket=bucket_name, Key=path)
-                                print "[%30s] %s is deleted." % (EXCEED_LIMIT, path)
+                                print ("[%30s] %s is deleted." % (EXCEED_LIMIT, path))
 
                     except ClientError as ex:
                         if ex.response['Error']['Code'] == 'NoSuchKey':
@@ -114,12 +115,12 @@ class Command(BaseCommand):
 
                             with open(full_path, 'rt') as fp:
                                 if EXCEED_LIMIT in fp.read():
-                                    print "[%s] %s" % (EXCEED_LIMIT, path)
+                                    print ("[%s] %s" % (EXCEED_LIMIT, path))
                                     return
 
                             s3.upload_file(full_path, bucket_name, path)
-                            print "Saved at S3 [%10s] - %d" % (path, os.stat(full_path).st_size)
+                            print ("Saved at S3 [%10s] - %d" % (path, os.stat(full_path).st_size))
 
                         else:
-                            print ex
+                            print (ex)
                             raise ex
