@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-
+import os
+from unittest import skipIf
 from django.test import TestCase
 from django.core.cache import cache
 from .utils import (get_content_with_key,
@@ -9,6 +9,8 @@ from .utils import (get_content_with_key,
                     create_deals,
                     _get_data_go_kr_key)
 from earth.models import Deal, _address_to_geolocation
+
+SKIP_TEST = os.getenv('SKIP_TEST', 'true').lower() in ('true', '1', '')
 
 
 class ArticlesTestCase(TestCase):
@@ -20,6 +22,7 @@ class ArticlesTestCase(TestCase):
 
 class DealsTeatCase(TestCase):
 
+    @skipIf(SKIP_TEST, "Unit test doesnt need to talk iamport server")
     def test_bulk_create(self):
         path = u'2016/04/47190_구미시.xml'
 
@@ -29,14 +32,16 @@ class DealsTeatCase(TestCase):
         create_deals(data_json, origin=path)
 
         for deal in Deal.objects.filter(origin=path):
-            print deal.update_location()
+            print(deal.update_location())
 
     def test_get_s3_keys(self):
         list_of_keys = get_s3_keys(u'2016/04')
 
+    @skipIf(SKIP_TEST, "Unit test doesnt need to talk iamport server")
     def test_update_deals(self):
         update_deals(year=2016, month='2')
 
+    @skipIf(SKIP_TEST, "Unit test doesnt need to talk iamport server")
     def test_update_deals_without_month(self):
         update_deals(year=2016)
 
@@ -44,7 +49,7 @@ class DealsTeatCase(TestCase):
         params = {'q': '대화동 2212'}
         item = _address_to_geolocation(**params)
         for k, v in item.items():
-            print k, v
+            print(k, v)
 
     def test_get_data_go_kr_key(self):
         data_key = cache.get('DATA_KEY')

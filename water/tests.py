@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import requests_mock
 import os
 import boto
@@ -24,14 +23,15 @@ class ArticlesTestCase(TestCase):
         conn.create_bucket('hmapps')
 
         self.rep_hani_rss = open('water/dumps/hani.rss', 'r').read()
-        self.rep_mk_rss = open('water/dumps/mk.rss', 'r').read()
+
+        self.rep_mk_rss = open('water/dumps/mk.rss', 'rb').read().decode('cp949')
         self.rep_790164 = open('water/dumps/790164.html', 'r').read()
         self.rep_790165 = open('water/dumps/790165.html', 'r').read()
         self.rep_790166 = open('water/dumps/790166.html', 'r').read()
 
-        self.rep_245269 = open('water/dumps/245269.html', 'r').read()
-        self.rep_245273 = open('water/dumps/245273.html', 'r').read()
-        self.rep_245393 = open('water/dumps/245393.html', 'r').read()
+        self.rep_245269 = open('water/dumps/245269.html', 'rb').read().decode('cp949')
+        self.rep_245273 = open('water/dumps/245273.html', 'rb').read().decode('cp949')
+        self.rep_245393 = open('water/dumps/245393.html', 'rb').read().decode('cp949')
 
     def test_insert_news_to_db(self):
         fp = open('water/dumps/articles.txt', 'r')
@@ -44,14 +44,10 @@ class ArticlesTestCase(TestCase):
         # parses the root rss file properly
         # save the content of link in rss into S3
 
-        m.get('http://www.hani.co.kr/rss/',
-              text=self.rep_hani_rss.decode('utf8'))
-        m.get('http://www.hani.co.kr/arti/society/labor/790164.html',
-              text=self.rep_790164.decode('utf8'))
-        m.get('http://www.hani.co.kr/arti/economy/it/790165.html',
-              text=self.rep_790165.decode('utf8'))
-        m.get('http://www.hani.co.kr/arti/society/health/790166.html',
-              text=self.rep_790166.decode('utf8'))
+        m.get('http://www.hani.co.kr/rss/', text=self.rep_hani_rss)
+        m.get('http://www.hani.co.kr/arti/society/labor/790164.html', text=self.rep_790164)
+        m.get('http://www.hani.co.kr/arti/economy/it/790165.html', text=self.rep_790165)
+        m.get('http://www.hani.co.kr/arti/society/health/790166.html', text=self.rep_790166)
 
         fetch_news_to_S3()
         self.assertEqual(len(default_storage.bucket.get_all_keys()), 3)
@@ -63,7 +59,7 @@ class ArticlesTestCase(TestCase):
         for ele in [e for e in os.listdir('water/dumps/') if 'html' in e]:
             default_storage.save('hani/%s-%s' %
                                  (datetime.now().strftime('%Y-%m-%d'), ele),
-                                 open('water/dumps/%s' % ele, 'r'))
+                                 open('water/dumps/%s' % ele, 'rb'))
 
         articles = load_from_S3()
         self.assertEqual(len(articles), 6)
@@ -78,24 +74,16 @@ class ArticlesTestCase(TestCase):
     @requests_mock.mock()
     def test_celery_send_email_for_fetched_articles(self, m):
 
-        m.get('http://www.hani.co.kr/rss',
-              text=self.rep_hani_rss.decode('utf8'))
-        m.get('http://file.mk.co.kr/news/rss/rss_30100041.xml',
-              text=self.rep_mk_rss.decode('euc-kr', 'ignore'))
+        m.get('http://www.hani.co.kr/rss', text=self.rep_hani_rss)
+        m.get('http://file.mk.co.kr/news/rss/rss_30100041.xml', text=self.rep_mk_rss)
 
-        m.get('http://www.hani.co.kr/arti/society/labor/790164.html',
-              text=self.rep_790164.decode('utf8'))
-        m.get('http://www.hani.co.kr/arti/economy/it/790165.html',
-              text=self.rep_790165.decode('utf8'))
-        m.get('http://www.hani.co.kr/arti/society/health/790166.html',
-              text=self.rep_790166.decode('utf8'))
+        m.get('http://www.hani.co.kr/arti/society/labor/790164.html', text=self.rep_790164)
+        m.get('http://www.hani.co.kr/arti/economy/it/790165.html', text=self.rep_790165)
+        m.get('http://www.hani.co.kr/arti/society/health/790166.html', text=self.rep_790166)
 
-        m.get('http://news.mk.co.kr/newsRead.php?no=245393&year=2017',
-              text=self.rep_245269.decode('euc-kr', 'ignore'))
-        m.get('http://news.mk.co.kr/newsRead.php?no=245273&year=2017',
-              text=self.rep_245273.decode('euc-kr', 'ignore'))
-        m.get('http://news.mk.co.kr/newsRead.php?no=245269&year=2017',
-              text=self.rep_245393.decode('euc-kr', 'ignore'))
+        m.get('http://news.mk.co.kr/newsRead.php?no=245393&year=2017', text=self.rep_245269)
+        m.get('http://news.mk.co.kr/newsRead.php?no=245273&year=2017', text=self.rep_245273)
+        m.get('http://news.mk.co.kr/newsRead.php?no=245269&year=2017', text=self.rep_245393)
 
         kwargs = {"url": "http://www.hani.co.kr/rss"}
         kwargs = {"url": "http://file.mk.co.kr/news/rss/rss_30100041.xml"}

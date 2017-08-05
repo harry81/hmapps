@@ -1,11 +1,7 @@
-try:
-    from settings import *
-    from django.conf import settings
-except:
-    pass
+from main.settings import *
 
-if 'live' in settings.DATABASES:
-    settings.DATABASES.pop('live')
+if 'live' in DATABASES:
+    DATABASES.pop('live')
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 CELERY_ALWAYS_EAGER = True
