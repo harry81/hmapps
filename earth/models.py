@@ -113,7 +113,7 @@ class Deal(TimeStampedModel):
     deal_yy = models.IntegerField(u'년')
     deal_mm = models.IntegerField(u'월')
     deal_dd = models.CharField(u'일', max_length=32)
-    bldg_area = models.CharField(u'전용면적', max_length=32)
+    bldg_area = models.FloatField(u'전용면적', max_length=32)
     bobn = models.CharField(u'지번', max_length=32)
     area_cd = models.CharField(u'지역코드', max_length=32)
     area_nm = models.CharField(u'지역이름', max_length=32, default='')
