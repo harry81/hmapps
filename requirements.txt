@@ -122,3 +122,4 @@ wcwidth==0.1.7
 websocket-client==0.44.0
 xmltodict==0.10.2
 yapf==0.16.2
+django-debug-toolbar==1.8

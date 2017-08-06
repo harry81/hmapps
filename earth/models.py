@@ -121,9 +121,6 @@ class Deal(TimeStampedModel):
     origin = models.CharField(u'추출경로', max_length=256, null=True, blank=True)
     location = models.ForeignKey(Location, related_name="deals", null=True, blank=True)
 
-    class Meta:
-        ordering = ['-deal_yy', '-deal_mm']
-
     def __unicode__(self):
         return "%s %s" % (self.bldg_nm, self.bldg_area)
 
