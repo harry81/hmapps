@@ -110,9 +110,9 @@ class Deal(TimeStampedModel):
     bldg_yy = models.CharField(u'건축년도', max_length=32)
     dong = models.CharField(u'법정동', max_length=32)
     bldg_nm = models.CharField(u'아파트', max_length=256)
-    deal_yy = models.IntegerField(u'년')
-    deal_mm = models.IntegerField(u'월')
-    deal_dd = models.CharField(u'일', max_length=32)
+    deal_yy = models.IntegerField(u'년', db_index=True)
+    deal_mm = models.IntegerField(u'월', db_index=True)
+    deal_dd = models.CharField(u'일', max_length=32, db_index=True)
     bldg_area = models.FloatField(u'전용면적', max_length=32)
     bobn = models.CharField(u'지번', max_length=32)
     area_cd = models.CharField(u'지역코드', max_length=32)
@@ -122,7 +122,7 @@ class Deal(TimeStampedModel):
     location = models.ForeignKey(Location, related_name="deals", null=True, blank=True)
 
     class Meta:
-        ordering = ['-deal_yy', '-deal_mm', '-deal_dd']
+        ordering = ['-deal_yy', '-deal_mm']
 
     def __unicode__(self):
         return "%s %s" % (self.bldg_nm, self.bldg_area)
