@@ -19,6 +19,7 @@ class DealViewSet(mixins.CreateModelMixin,
     serializer_class = DealSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('location', )
+    ordering_fields = ('-deal_yy', '-deal_mm')
 
     @list_route(methods=['post'])
     def load_deals(self, request):
