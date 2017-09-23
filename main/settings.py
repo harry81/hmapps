@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'cv1u$8mv(+k4o507gc80jp@=%rb4o@cg&sh@2r5cz#pfb8z5ak'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
@@ -170,6 +170,7 @@ INSTALLED_APPS = (
 
     'water',
     'earth',
+    'bike',
     'main',
 )
 
@@ -179,6 +180,7 @@ RAVEN_CONFIG = {
 
 
 DAUM_API_KEY = os.getenv('DAUM_API_KEY', '')
+REGION_NAME = 'ap-northeast-2'
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
 

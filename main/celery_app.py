@@ -8,6 +8,7 @@ from raven.contrib.celery import register_signal, register_logger_signal
 # set the default Django settings module for the 'celery' program.
 INCLUDED_TASKS = [
     'water.tasks',
+    'bike.tasks',
 ]
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'main.settings')
