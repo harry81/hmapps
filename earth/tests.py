@@ -1,6 +1,7 @@
 import os
 from unittest import skipIf
 from django.test import TestCase
+from rest_framework.test import APITestCase
 from django.core.cache import cache
 from .utils import (get_content_with_key,
                     get_s3_keys,
@@ -20,7 +21,8 @@ class ArticlesTestCase(TestCase):
         pass
 
 
-class DealsTeatCase(TestCase):
+class DealsTeatCase(APITestCase):
+    fixtures = ['deals']
 
     @skipIf(SKIP_TEST, "Unit test doesnt need to talk iamport server")
     def test_bulk_create(self):
@@ -28,7 +30,6 @@ class DealsTeatCase(TestCase):
 
         content = get_content_with_key(path=path)
         data_json = convert_data_to_json(content)
-        condition = {"origin": path}
         create_deals(data_json, origin=path)
 
         for deal in Deal.objects.filter(origin=path):
@@ -59,3 +60,12 @@ class DealsTeatCase(TestCase):
 
         data_key = cache.get('DATA_KEY')
         self.assertEqual(data_key, "DATA_GO_KR_KEY2")
+
+    def test_get_deals(self):
+        resp = self.client.get('/en/api/earth/location/2152/?ordering=deals__deal_yy,deals__deal_mm')
+
+        lst_db = sorted([deal.deal_mm for deal in Deal.objects.filter(location__id=2152)],
+                        reverse=True)
+        lst_resp = [deal['deal_mm'] for deal in resp.json()['deals']]
+
+        self.assertEqual(lst_db, lst_resp, [lst_db, lst_resp])
