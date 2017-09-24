@@ -8,6 +8,9 @@ class Center(TimeStampedModel):
     point = models.PointField(default='POINT (0 0)', srid=4326)
     station_name = models.CharField('대여소 이름', max_length=128, null=True, blank=True)
 
+    def __str__(self):
+        return "%s" % self.station_name
+
     def __unicode__(self):
         return "%s" % self.station_name
 
@@ -30,7 +33,11 @@ class StateCenter(TimeStampedModel):
                 station_name=kwargs.pop('station_name', None),
                 point=Point(lng, lat)
             )
-            Center.objects.get_or_create(station_id=center['station_id'], defaults=center)
+            center, _ = Center.objects.get_or_create(
+                station_id=center['station_id'], defaults=center)
+
+            if center:
+                kwargs['center'] = center
 
         super(StateCenter, self).__init__(*args, **kwargs)
 
