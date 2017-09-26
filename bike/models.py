@@ -9,10 +9,7 @@ class Center(TimeStampedModel):
     station_name = models.CharField('대여소 이름', max_length=128, null=True, blank=True)
 
     def __str__(self):
-        return "%s" % self.station_name
-
-    def __unicode__(self):
-        return "%s" % self.station_name
+        return "%s" % self.station_id
 
 
 class StateCenter(TimeStampedModel):

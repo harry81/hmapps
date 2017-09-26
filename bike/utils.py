@@ -1,14 +1,7 @@
-import boto3
 import re
 import requests
 from datetime import datetime
-from django.conf import settings
 
-
-dynamodb = boto3.resource('dynamodb',
-                          aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                          aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                          region_name=settings.REGION_NAME)
 
 url_bike = 'https://www.bikeseoul.com/app/station/getStationRealtimeStatus.do'
 
@@ -26,40 +19,6 @@ def camel_to_snake_as_dict(obj):
         rlt[camel_to_snake(key)] = obj.get(key)
 
     return rlt
-
-
-def create_table(table):
-    table = dynamodb.create_table(
-        TableName=table,
-        KeySchema=[
-            {
-                'AttributeName': 'stationId',
-                'KeyType': 'HASH'
-            },
-            {
-                'AttributeName': 'when',
-                'KeyType': 'RANGE'
-            }
-        ],
-        AttributeDefinitions=[
-            {
-                'AttributeName': 'when',
-                'AttributeType': 'S'
-            },
-            {
-                'AttributeName': 'stationId',
-                'AttributeType': 'S'
-            },
-
-            ],
-        ProvisionedThroughput={
-            'ReadCapacityUnits': 5,
-            'WriteCapacityUnits': 5
-        }
-    )
-    table.meta.client.get_waiter('table_exists').wait(TableName=table)
-
-    return table
 
 
 def put_item(table, item):
@@ -81,18 +40,3 @@ def get_bike_info():
         rlt.append(ele)
 
     return rlt
-
-
-def load_bike_info_to_dynamo():
-    table_name = 'db_bikes'
-    bike_table = dynamodb.Table(table_name)
-
-    try:
-        bike_table.table_status
-
-    except:
-        bike_table = create_table(table_name)
-
-    bikes = get_bike_info()
-    for ele in bikes:
-        put_item(bike_table, ele)

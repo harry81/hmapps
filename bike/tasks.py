@@ -2,15 +2,10 @@ from main.celery_app import app as celery_app
 from datetime import datetime
 from django.core.mail import EmailMultiAlternatives
 from celery.utils.log import get_task_logger
-from .utils import load_bike_info_to_dynamo, get_bike_info, camel_to_snake_as_dict
+from .utils import get_bike_info, camel_to_snake_as_dict
 from .models import StateCenter
 
 logger = get_task_logger(__name__)
-
-
-@celery_app.task(bind=True)
-def celery_load_bike_infos(self,  **kwargs):
-    load_bike_info_to_dynamo()
 
 
 @celery_app.task(bind=True)
