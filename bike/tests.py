@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase
 from .models import StateCenter, Center
 from .utils import camel_to_snake_as_dict
+from .tasks import celery_bike_infos_to_s3
 
 
 class BikeTestCase(APITestCase):
@@ -20,9 +21,11 @@ class BikeTestCase(APITestCase):
         self.assertTrue(Center.objects.count() > 0)
 
     def test_save_bikecenter_at_s3(self):
-        bikes = []
-        for item in self.items:
-            bike = camel_to_snake_as_dict(item)
-            bikes.append(bike)
+        celery_bike_infos_to_s3()
+        # bikes = []
+        # for item in self.items:
+        #     bike = camel_to_snake_as_dict(item)
+        #     bikes.append(bike)
 
-        print(bikes)
+        # print(bikes)
+        # import ipdb; ipdb.set_trace()
