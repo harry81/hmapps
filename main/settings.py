@@ -35,6 +35,7 @@ CORS_ORIGIN_WHITELIST = (
     'hmapps.healworld.co.kr',
     'earth.healworld.co.kr',
     'localhost',
+    '.ap-northeast-2.amazonaws.com',
     '127.0.0.1:8100'
 )
 
@@ -245,8 +246,6 @@ CMS_TEMPLATES = (
 CMS_PERMISSION = True
 
 CMS_PLACEHOLDER_CONF = {}
-
-
 
 DATABASES = {
     'default': {

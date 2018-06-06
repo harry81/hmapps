@@ -1,0 +1,47 @@
+{
+  "dev": {
+    "aws_region": "ap-northeast-2",
+    "django_settings": "main.settings",
+    "profile_name": "pointer81-aws",
+    "project_name": "hmapps-virt-prod-env",
+    "runtime": "python3.6",
+    "s3_bucket": "zappa-hmapps-dev",
+    "xray_tracing": true,
+    "delete_local_zip": false
+  },
+  "prod": {
+    "aws_region": "ap-northeast-2",
+    "django_settings": "main.settings",
+    "profile_name": "pointer81-aws",
+    "project_name": "hmapps-virt-prod-env",
+    "runtime": "python3.6",
+    "s3_bucket": "zappa-hmapps-prod",
+    "xray_tracing": true,
+    "delete_local_zip": false,
+    "exclude": ["settings_*.py", ],
+    "environment_variables": {
+      "AWS_ACCESS_KEY_ID": "*****",
+      "AWS_SECRET_ACCESS_KEY" : "djZq9Htd6D08zVxJpRJmyTgxgzkv/l1YEYgk9uAa",
+      "DAUM_API_KEY" : "9f68e425f40e190b407745eb855619262ce0b2cc",
+      "DJANGO_SETTINGS_MODULE" : "main.settings",
+      "EMAIL_HOST" : "smtp.sendgrid.net",
+      "EMAIL_HOST_PASSWORD" : "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",
+      "EMAIL_HOST_USER" : "apikey",
+      "GCM_SERVER_KEY" : "AIzaSyC1sfs2qJGrWiMXvYyHD5QG5AM5HoPbLo4",
+      "ISAWS" : "True",
+      "RAVEN_DSN" : "685b68704634462ebd2b855d94f39bf6:986abe1900264a6f9649c555d562efb3",
+      "RDS_DB_NAME" : "ebdb",
+      "RDS_HOSTNAME" : "ebdb.cjbwtmdbdlob.ap-northeast-2.rds.amazonaws.com",
+      "RDS_PASSWORD" : "pw-myapps",
+      "RDS_USERNAME" : "myapps",
+      "SMS_APIKEY" : "7bac7074dbca11e6a8a30cc47a1fcfae",
+      "SMS_APPID" : "healworld",
+      "SOCIAL_AUTH_FACEBOOK_KEY" : "221879398254081",
+      "SOCIAL_AUTH_FACEBOOK_SECRET" : "b0d2caec244b2844071eaebc6a252b76",
+      "SOCIAL_AUTH_KAKAO_KEY" : "6901c2a574288db8a31dbe3e2ed5dae4",
+      "SOCIAL_AUTH_KAKAO_SECRET" : "d8a1fb91acb39634edb33dfbed834609",
+      "SOCIAL_AUTH_NAVER_KEY" : "mAGsI5imdDqwwg8LwhJH",
+      "SOCIAL_AUTH_NAVER_SECRET" : "58rX8bWARl"
+    }
+  }
+}
